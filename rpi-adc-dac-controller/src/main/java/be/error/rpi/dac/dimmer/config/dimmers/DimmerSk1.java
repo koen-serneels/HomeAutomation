@@ -1,8 +1,10 @@
 package be.error.rpi.dac.dimmer.config.dimmers;
 
+import static be.error.rpi.dac.dimmer.config.DimmerName.SK1;
+
+import be.error.rpi.dac.dimmer.builder.Dimmer;
 import be.error.rpi.dac.dimmer.builder.DimmerBuilder;
 import be.error.rpi.dac.dimmer.config.DimmerConfig;
-import be.error.rpi.dac.dimmer.config.DimmerName;
 
 /**
  * @author Koen Serneels
@@ -10,10 +12,10 @@ import be.error.rpi.dac.dimmer.config.DimmerName;
 public class DimmerSk1 implements DimmerConfig {
 
 	@Override
-	public void start() throws Exception {
-		new DimmerBuilder() {
+	public Dimmer start() throws Exception {
+		return new DimmerBuilder() {
 			{
-				name(DimmerName.SK1);
+				name(SK1);
 				ic2BoardAddress(0x5B);
 				boardChannel(0);
 

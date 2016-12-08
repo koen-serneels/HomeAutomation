@@ -87,4 +87,24 @@ public class KnxDimmerProcessListener extends AbstractDimmerProcessListener {
 	public void detached(final DetachEvent e) {
 
 	}
+
+	public boolean isDimmerGroupAddress(GroupAddress groupAddress) {
+		if (onOff.equals(groupAddress)) {
+			return true;
+		}
+
+		if (dim.isPresent() && dim.get().equals(groupAddress)) {
+			return true;
+		}
+
+		if (dimAbsolute.isPresent() && dim.get().equals(groupAddress)) {
+			return true;
+		}
+
+		return false;
+	}
+
+	public int getMinDimVal() {
+		return minDimVal;
+	}
 }

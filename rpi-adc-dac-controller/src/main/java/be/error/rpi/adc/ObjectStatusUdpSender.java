@@ -35,7 +35,6 @@ public class ObjectStatusUdpSender {
 
 	public void send(List<Pair<AdcChannel, ObjectStatusType>> results) throws Exception {
 		for (Pair<AdcChannel, ObjectStatusType> pair : results) {
-
 			byte id = (byte) Integer.parseInt(pair.getLeft().getId());
 			byte[] toSend = add(new byte[] { id }, pair.getRight().getId());
 			DatagramPacket sendPacket = new DatagramPacket(toSend, toSend.length, IPAddress, port);

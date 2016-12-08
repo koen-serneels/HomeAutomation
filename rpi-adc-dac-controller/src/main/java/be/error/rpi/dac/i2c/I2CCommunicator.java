@@ -29,7 +29,11 @@ public class I2CCommunicator extends Thread {
 			try {
 				writeCommand = commandQueue.take();
 				writeCommand.i2cDevice.write(writeCommand.value, 0, writeCommand.value.length);
-				sleep(3);
+				sleep(5);
+				//If there is a next command, and the command is meant for the same board as we have just written to, wait to avoid overload
+				if (commandQueue.peek() == null || (commandQueue.peek() != null && commandQueue.peek().boardAddress == writeCommand.boardAddress)) {
+					sleep(8);
+				}
 			} catch (Exception e) {
 				logger.error("Communicator thread had exception. Write command: " + writeCommand, e);
 			}

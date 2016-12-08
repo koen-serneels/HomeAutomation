@@ -1,5 +1,8 @@
 package be.error.rpi.dac.dimmer.config.dimmers;
 
+import static be.error.rpi.dac.dimmer.config.DimmerName.DRESSING;
+
+import be.error.rpi.dac.dimmer.builder.Dimmer;
 import be.error.rpi.dac.dimmer.builder.DimmerBuilder;
 import be.error.rpi.dac.dimmer.config.DimmerConfig;
 import be.error.rpi.dac.dimmer.config.DimmerName;
@@ -10,10 +13,10 @@ import be.error.rpi.dac.dimmer.config.DimmerName;
 public class DimmerDressing implements DimmerConfig{
 
 	@Override
-	public void start() throws Exception {
-		new DimmerBuilder() {
+	public Dimmer start() throws Exception {
+		return  new DimmerBuilder() {
 			{
-				name(DimmerName.DRESSING);
+				name(DRESSING);
 				ic2BoardAddress(0x5B);
 				boardChannel(2);
 				outputGroupAddressesForVisualisationStatusFeedback("15/0/3");

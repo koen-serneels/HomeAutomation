@@ -3,12 +3,16 @@ package be.error.rpi.dac.dimmer.builder;
 import static be.error.rpi.config.RunConfig.getInstance;
 import static be.error.rpi.dac.dimmer.builder.DimDirection.DOWN;
 import static be.error.rpi.dac.dimmer.builder.DimDirection.UP;
+import static java.util.Optional.empty;
+import static java.util.Optional.of;
+import static org.apache.commons.collections4.CollectionUtils.union;
 import static tuwien.auto.calimero.dptxlator.DPTXlator8BitUnsigned.DPT_PERCENT_U8;
 
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -36,10 +40,13 @@ public class Dimmer extends Thread {
 	private int stepDelay = 30;
 
 	private List<GroupAddress> feedbackGroupAddresses = new ArrayList();
+	private List<GroupAddress> switchLedControlGroupAddresses = new ArrayList();
 	private List<GroupAddress> switchGroupAddresses = new ArrayList();
+	private List<GroupAddress> outputSwitchUpdateGroupAddresses = new ArrayList<>();
 
 	private BigDecimal curVal = ZERO;
 	private BigDecimal sentVal = ZERO;
+
 	private BigDecimal minDimValue = new BigDecimal("1.0");
 	private DimDirection lastDimDirection;
 
@@ -50,16 +57,21 @@ public class Dimmer extends Thread {
 	private final int boardAddress;
 	private final int channel;
 
+	private KnxDimmerProcessListener knxDimmerProcessListener;
 	private final ProcessCommunicator pc;
 
-	public Dimmer(DimmerName dimmerName, int boardAddress, int channel, List<GroupAddress> switchGroupAddresses, List<GroupAddress> feedbackGroupAddresses)
-			throws IOException {
+	private Optional<DimmerCommand> lastDimCommand = empty();
+	private Optional<DimmerCommand> activeScene = empty();
+
+	public Dimmer(DimmerName dimmerName, int boardAddress, int channel, List<GroupAddress> switchGroupAddresses, List<GroupAddress> feedbackGroupAddresses,
+			List<GroupAddress> switchLedControlGroupAddresses, List<GroupAddress> outputSwitchUpdateGroupAddresses) throws IOException {
 
 		this.dimmerName = dimmerName;
 		this.boardAddress = boardAddress;
 		this.channel = channel;
 		this.switchGroupAddresses = switchGroupAddresses;
 		this.feedbackGroupAddresses = feedbackGroupAddresses;
+		this.switchLedControlGroupAddresses = switchLedControlGroupAddresses;
 		this.pc = getInstance().getKnxConnectionFactory().createProcessCommunicator();
 	}
 
@@ -69,12 +81,30 @@ public class Dimmer extends Thread {
 			try {
 				DimmerCommand dimmerCommand = commandQueue.take();
 				interupt.set(false);
+				boolean feedbackSend = false;
 
-				if (curVal.equals(ZERO) && dimmerCommand.getTargetVal().compareTo(ZERO) > 0) {
-					for (GroupAddress groupAddress : switchGroupAddresses) {
-						pc.write(groupAddress, true);
+				if (dimmerCommand.getSceneContext().isPresent()) {
+					if (dimmerCommand.getSceneContext().get().isSceneActive()) {
+						lastDimCommand = empty();
+						activeScene = of(dimmerCommand);
+						activateSceneLeds();
+					} else {
+						activeScene = empty();
+						dimmerCommand = dimmerCommand.isUseThisDimCommandOnSceneDeativate() ? dimmerCommand : lastDimCommand.orElse(dimmerCommand);
 					}
-					sleep(delayBeforeIncreasingDimValue);
+				} else {
+					lastDimCommand = of(dimmerCommand);
+					if ((dimmerCommand.getTargetVal().compareTo(ZERO) == 0)) {
+						if ((activeScene.isPresent())) {
+							activateSceneLeds();
+							dimmerCommand = activeScene.get();
+							sendFeedback(dimmerCommand.getTargetVal().intValue(), true);
+							feedbackSend = true;
+						}
+					} else {
+						activateAllLedsAndFeedback();
+						sleep(delayBeforeIncreasingDimValue);
+					}
 				}
 
 				if (dimmerCommand.getTargetVal().compareTo(curVal) > 0) {
@@ -97,13 +127,8 @@ public class Dimmer extends Thread {
 					}
 				}
 
-				//TODO KSE Add something configurable
-				if (!dimmerCommand.getOrigin().equals(getInstance().getLoxoneIa())) {
-					for (GroupAddress groupAddress : feedbackGroupAddresses) {
-						DPTXlator8BitUnsigned dDPTXlator8BitUnsigned = new DPTXlator8BitUnsigned(DPT_PERCENT_U8);
-						dDPTXlator8BitUnsigned.setValue(getCurVal().intValue());
-						pc.write(groupAddress, dDPTXlator8BitUnsigned);
-					}
+				if (!feedbackSend && !getInstance().getLoxoneIa().equals(dimmerCommand.getOrigin())) {
+					sendFeedback(getCurVal().intValue(), false);
 				}
 
 				if (curVal.compareTo(ZERO) == 0) {
@@ -115,7 +140,7 @@ public class Dimmer extends Thread {
 					}
 
 					if (!interupt.get()) {
-						for (GroupAddress groupAddress : switchGroupAddresses) {
+						for (GroupAddress groupAddress : union(union(switchGroupAddresses, switchLedControlGroupAddresses), outputSwitchUpdateGroupAddresses)) {
 							try {
 								pc.write(groupAddress, false);
 							} catch (Exception e) {
@@ -141,6 +166,35 @@ public class Dimmer extends Thread {
 
 	public void interrupt() {
 		interupt.set(true);
+	}
+
+	private void activateAllLedsAndFeedback() throws Exception {
+		for (GroupAddress groupAddress : union(union(switchGroupAddresses, switchLedControlGroupAddresses), outputSwitchUpdateGroupAddresses)) {
+			pc.write(groupAddress, true);
+		}
+	}
+
+	private void activateSceneLeds() throws Exception {
+		for (GroupAddress groupAddress : union(union(switchGroupAddresses, switchLedControlGroupAddresses), outputSwitchUpdateGroupAddresses)) {
+			pc.write(groupAddress, false);
+		}
+		for (GroupAddress groupAddress : activeScene.get().getSceneContext().get().getSceneParticipants()) {
+			pc.write(groupAddress, true);
+		}
+	}
+
+	private void sendFeedback(int val, boolean refresh) throws Exception {
+		for (GroupAddress groupAddress : feedbackGroupAddresses) {
+
+			DPTXlator8BitUnsigned dDPTXlator8BitUnsigned = new DPTXlator8BitUnsigned(DPT_PERCENT_U8);
+			if (refresh) {
+				dDPTXlator8BitUnsigned.setValue(0);
+				pc.write(groupAddress, dDPTXlator8BitUnsigned);
+			}
+
+			dDPTXlator8BitUnsigned.setValue(val);
+			pc.write(groupAddress, dDPTXlator8BitUnsigned);
+		}
 	}
 
 	private void processCommand(DimmerCommand dimmerCommand) throws IOException {
@@ -172,6 +226,10 @@ public class Dimmer extends Thread {
 		return lastDimDirection;
 	}
 
+	public Optional<DimmerCommand> getLastDimCommand() {
+		return lastDimCommand;
+	}
+
 	void setTurnOffDelay(final long turnOffDelay) {
 		this.turnOffDelay = turnOffDelay;
 	}
@@ -182,6 +240,14 @@ public class Dimmer extends Thread {
 
 	void setStepDelay(final int stepDelay) {
 		this.stepDelay = stepDelay;
+	}
+
+	public KnxDimmerProcessListener getKnxDimmerProcessListener() {
+		return knxDimmerProcessListener;
+	}
+
+	public void setKnxDimmerProcessListener(final KnxDimmerProcessListener knxDimmerProcessListener) {
+		this.knxDimmerProcessListener = knxDimmerProcessListener;
 	}
 }
 

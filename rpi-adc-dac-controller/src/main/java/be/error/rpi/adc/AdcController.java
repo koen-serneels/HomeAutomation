@@ -6,6 +6,7 @@ import static java.util.concurrent.CompletableFuture.allOf;
 import static java.util.concurrent.CompletableFuture.supplyAsync;
 import static java.util.concurrent.Executors.newFixedThreadPool;
 import static java.util.stream.Collectors.toList;
+import static org.apache.commons.lang3.tuple.Pair.of;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -54,6 +55,7 @@ public class AdcController {
 
 		AdcControllerConfiguration adcControllerConfiguration = new AdcControllerConfiguration();
 
+		int i = 0;
 		while (true) {
 			List<CompletableFuture<List<Pair<AdcChannel, ObjectStatusType>>>> futures = new ArrayList();
 
@@ -70,8 +72,17 @@ public class AdcController {
 				}
 			})).get().collect(toList());
 
-			sender.send(results);
-			sleep(2000);
+			sleep(1000);
+
+			//Send internally
+			getInstance().postAdcEvent(results.stream().map(p -> of(p.getLeft().getId(), p.getRight())).collect(toList()));
+
+			//Only send every 2 seconds via UDP
+			i++;
+			if (i == 2) {
+				sender.send(results);
+				i = 0;
+			}
 		}
 	}
 }

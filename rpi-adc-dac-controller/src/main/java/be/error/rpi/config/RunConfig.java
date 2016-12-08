@@ -2,15 +2,20 @@ package be.error.rpi.config;
 
 import static com.pi4j.io.i2c.I2CBus.BUS_1;
 
+import java.util.List;
+
+import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.eventbus.EventBus;
 import com.pi4j.io.i2c.I2CBus;
 import com.pi4j.io.i2c.I2CFactory;
 
 import tuwien.auto.calimero.IndividualAddress;
 import tuwien.auto.calimero.exception.KNXException;
 
+import be.error.rpi.adc.ObjectStatusTypeMapper.ObjectStatusType;
 import be.error.rpi.dac.i2c.I2CCommunicator;
 import be.error.rpi.knx.KnxConnectionFactory;
 
@@ -34,6 +39,8 @@ public class RunConfig {
 
 	private I2CBus bus;
 	private I2CCommunicator i2CCommunicator;
+
+	private EventBus adcEventBus = new EventBus();
 
 	private static RunConfig runConfig;
 
@@ -112,5 +119,13 @@ public class RunConfig {
 
 	public I2CCommunicator getI2CCommunicator() {
 		return i2CCommunicator;
+	}
+
+	public void registerAdcEventListener(Object o) {
+		adcEventBus.register(o);
+	}
+
+	public void postAdcEvent(List<Pair<String, ObjectStatusType>> list) {
+		adcEventBus.post(list);
 	}
 }

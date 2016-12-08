@@ -9,5 +9,5 @@ import be.error.rpi.dac.dimmer.builder.Dimmer;
  */
 public interface DimmerConfig {
 
-	void start() throws Exception;
+	Dimmer start() throws Exception;
 }

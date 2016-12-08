@@ -41,6 +41,8 @@ public class DimmerBuilder {
 
 	//GA's that are written to (~output)
 	private List<GroupAddress> switchGroupAddresses = new ArrayList();
+	private List<GroupAddress> switchLedControlGroupAddresses = new ArrayList();
+	private List<GroupAddress> switchUpdateGroupAddresses = new ArrayList();
 	private List<GroupAddress> feedbackGroupAddresses = new ArrayList();
 
 	/**
@@ -73,6 +75,16 @@ public class DimmerBuilder {
 	 */
 	public DimmerBuilder outputGroupAddressesForActorSwitchingOnAndOff(String... groupAddresses) {
 		switchGroupAddresses.addAll(asList(groupAddresses).stream().map(s -> createGroupAddress(s)).collect(toList()));
+		return this;
+	}
+
+	public DimmerBuilder outputGroupAddressesForSwitchLedControl(String... groupAddresses) {
+		switchLedControlGroupAddresses.addAll(asList(groupAddresses).stream().map(s -> createGroupAddress(s)).collect(toList()));
+		return this;
+	}
+
+	public DimmerBuilder outputSwitchUpdateGroupAddresses(String... groupAddresses) {
+		switchUpdateGroupAddresses.addAll(asList(groupAddresses).stream().map(s -> createGroupAddress(s)).collect(toList()));
 		return this;
 	}
 
@@ -154,7 +166,8 @@ public class DimmerBuilder {
 
 	public Dimmer build() {
 		try {
-			Dimmer dimmer = new Dimmer(name, boardAddress, channel, switchGroupAddresses, feedbackGroupAddresses);
+			Dimmer dimmer = new Dimmer(name, boardAddress, channel, switchGroupAddresses, feedbackGroupAddresses, switchLedControlGroupAddresses,
+					switchUpdateGroupAddresses);
 
 			if (delayBeforeIncreasingDimValue.isPresent()) {
 				dimmer.setDelayBeforeIncreasingDimValue(delayBeforeIncreasingDimValue.get());
@@ -171,7 +184,7 @@ public class DimmerBuilder {
 
 			KnxDimmerProcessListener knxDimmerProcessListener = new KnxDimmerProcessListener(onOff, dim, dimAbsolute, minDimVal, dimmer);
 			getInstance().getKnxConnectionFactory().createProcessCommunicator(knxDimmerProcessListener);
-
+			dimmer.setKnxDimmerProcessListener(knxDimmerProcessListener);
 			return dimmer;
 		} catch (Exception e) {
 			logger.error("Could not build dimmers", e);

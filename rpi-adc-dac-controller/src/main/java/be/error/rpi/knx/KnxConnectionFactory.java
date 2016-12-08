@@ -57,6 +57,7 @@ public class KnxConnectionFactory {
 				}
 			});
 			knxNetworkLinkIP = new KNXNetworkLinkIP(TUNNELING, new InetSocketAddress(localIp, 0), new InetSocketAddress(knxIp, knxPort), true, new TPSettings(true));
+
 			knxNetworkLinkIP.addLinkListener(new NetworkLinkListener() {
 				@Override
 				public void confirmation(final FrameEvent e) {
