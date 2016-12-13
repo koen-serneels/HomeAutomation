@@ -7,14 +7,15 @@ import org.slf4j.LoggerFactory;
 
 import be.error.rpi.adc.AdcController;
 import be.error.rpi.dac.dimmer.builder.Dimmer;
-import be.error.rpi.dac.dimmer.config.dimmers.DimmerBerging;
-import be.error.rpi.dac.dimmer.config.dimmers.DimmerEethoek;
-import be.error.rpi.dac.dimmer.config.dimmers.DimmerGang;
-import be.error.rpi.dac.dimmer.config.dimmers.DimmerInkomhal;
-import be.error.rpi.dac.dimmer.config.dimmers.DimmerKeuken;
-import be.error.rpi.dac.dimmer.config.dimmers.DimmerVoordeur;
-import be.error.rpi.dac.dimmer.config.dimmers.DimmerWc;
-import be.error.rpi.dac.dimmer.config.dimmers.DimmerZitHoek;
+import be.error.rpi.dac.dimmer.config.dimmers.buiten.DimmerVoordeur;
+import be.error.rpi.dac.dimmer.config.dimmers.gv.DimmerBerging;
+import be.error.rpi.dac.dimmer.config.dimmers.gv.DimmerEethoek;
+import be.error.rpi.dac.dimmer.config.dimmers.gv.DimmerGang;
+import be.error.rpi.dac.dimmer.config.dimmers.gv.DimmerGarage;
+import be.error.rpi.dac.dimmer.config.dimmers.gv.DimmerInkomhal;
+import be.error.rpi.dac.dimmer.config.dimmers.gv.DimmerKeuken;
+import be.error.rpi.dac.dimmer.config.dimmers.gv.DimmerWc;
+import be.error.rpi.dac.dimmer.config.dimmers.gv.DimmerZitHoek;
 import be.error.rpi.dac.dimmer.config.scenes.Gang;
 import be.error.rpi.dac.dimmer.config.scenes.GvComfort;
 
@@ -62,6 +63,7 @@ public class StartRpiGv {
 					Dimmer dimmerGang = new DimmerGang().start();
 					Dimmer dimmerWc = new DimmerWc().start();
 					Dimmer dimmerBerging = new DimmerBerging().start();
+					Dimmer dimmerGarage = new DimmerGarage().start();
 
 					new Gang(dimmerInkomhal, dimmerGang).run();
 					new GvComfort(dimmerEethoek, dimmerZithoek, dimmerKeuken).run();

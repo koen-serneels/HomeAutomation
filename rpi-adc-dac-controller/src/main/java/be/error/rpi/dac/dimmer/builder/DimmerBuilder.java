@@ -36,6 +36,8 @@ public class DimmerBuilder {
 
 	//GA's that are read from the bus (~input)
 	private GroupAddress onOff;
+	private Optional<GroupAddress> precenseDetectorLock = empty();
+	private Optional<GroupAddress> onOffOverride = empty();
 	private Optional<GroupAddress> dim = empty();
 	private Optional<GroupAddress> dimAbsolute = empty();
 
@@ -83,7 +85,7 @@ public class DimmerBuilder {
 		return this;
 	}
 
-	public DimmerBuilder outputSwitchUpdateGroupAddresses(String... groupAddresses) {
+	public DimmerBuilder outputGroupAddressesSwitchUpdate(String... groupAddresses) {
 		switchUpdateGroupAddresses.addAll(asList(groupAddresses).stream().map(s -> createGroupAddress(s)).collect(toList()));
 		return this;
 	}
@@ -113,6 +115,14 @@ public class DimmerBuilder {
 	 */
 	public DimmerBuilder delayBeforeIncreasingDimValue(final long delayBeforeIncreasingDimValue) {
 		this.delayBeforeIncreasingDimValue = of(delayBeforeIncreasingDimValue);
+		return this;
+	}
+
+	/**
+	 */
+	public DimmerBuilder inputGroupAddressForOnOffOverride(String onOffOverride, String precenseDetectorLock) {
+		this.onOffOverride = of(createGroupAddress(onOffOverride));
+		this.precenseDetectorLock = of(createGroupAddress(precenseDetectorLock));
 		return this;
 	}
 
@@ -182,7 +192,8 @@ public class DimmerBuilder {
 
 			dimmer.start();
 
-			KnxDimmerProcessListener knxDimmerProcessListener = new KnxDimmerProcessListener(onOff, dim, dimAbsolute, minDimVal, dimmer);
+			KnxDimmerProcessListener knxDimmerProcessListener = new KnxDimmerProcessListener(onOff, onOffOverride, precenseDetectorLock, dim, dimAbsolute, minDimVal,
+					dimmer);
 			getInstance().getKnxConnectionFactory().createProcessCommunicator(knxDimmerProcessListener);
 			dimmer.setKnxDimmerProcessListener(knxDimmerProcessListener);
 			return dimmer;

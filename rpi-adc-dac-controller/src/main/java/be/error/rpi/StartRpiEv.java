@@ -6,10 +6,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import be.error.rpi.dac.DacController;
-import be.error.rpi.dac.dimmer.config.dimmers.DimmerBadkamer;
-import be.error.rpi.dac.dimmer.config.dimmers.DimmerDressing;
-import be.error.rpi.dac.dimmer.config.dimmers.DimmerNachthal;
-import be.error.rpi.dac.dimmer.config.dimmers.DimmerSk1;
+import be.error.rpi.dac.dimmer.config.dimmers.buiten.DimmerAg;
+import be.error.rpi.dac.dimmer.config.dimmers.buiten.DimmerLzg;
+import be.error.rpi.dac.dimmer.config.dimmers.buiten.DimmerVg;
+import be.error.rpi.dac.dimmer.config.dimmers.ev.DimmerBadkamer;
+import be.error.rpi.dac.dimmer.config.dimmers.ev.DimmerDressing;
+import be.error.rpi.dac.dimmer.config.dimmers.ev.DimmerNachthal;
+import be.error.rpi.dac.dimmer.config.dimmers.ev.DimmerSk1;
 
 /**
  * @author Koen Serneels
@@ -28,7 +31,8 @@ public class StartRpiEv {
 			public void run() {
 				try {
 					DacController dacController = new DacController();
-					dacController.run(new DimmerBadkamer(), new DimmerDressing(), new DimmerNachthal(), new DimmerSk1());
+					dacController.run(new DimmerBadkamer(), new DimmerDressing(), new DimmerNachthal(), new DimmerSk1(), new DimmerAg(), new DimmerLzg(), new DimmerVg
+							());
 				} catch (Exception e) {
 					logger.error("DacController got exception", e);
 				}

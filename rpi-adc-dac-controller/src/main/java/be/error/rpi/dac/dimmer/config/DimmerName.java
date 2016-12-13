@@ -16,7 +16,12 @@ public enum DimmerName {
 	VOORDEUR("Inkom buiten"),
 	GANG("Gang"),
 	WC("WC"),
-	ZITHOEK("Zithoek");
+	ZITHOEK("Zithoek"),
+	GARAGE("Garage"),
+	LZG("LZG"),
+	AG("AG"),
+	RZG("RZG"),
+	VG("VG");
 
 	private String dimmerDescription;
 
@@ -24,4 +29,5 @@ public enum DimmerName {
 		this.dimmerDescription = dimmerDescription;
 	}
 }
+
 

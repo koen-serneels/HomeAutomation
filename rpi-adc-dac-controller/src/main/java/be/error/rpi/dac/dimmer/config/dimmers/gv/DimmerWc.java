@@ -1,6 +1,5 @@
-package be.error.rpi.dac.dimmer.config.dimmers;
+package be.error.rpi.dac.dimmer.config.dimmers.gv;
 
-import static be.error.rpi.dac.dimmer.config.DimmerName.NACHTHAL;
 import static be.error.rpi.dac.dimmer.config.DimmerName.WC;
 
 import be.error.rpi.dac.dimmer.builder.Dimmer;

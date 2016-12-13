@@ -1,5 +1,6 @@
 package be.error.rpi.dac.dimmer.builder;
 
+import static be.error.rpi.config.RunConfig.getInstance;
 import static be.error.rpi.dac.dimmer.builder.DimDirection.UP;
 import static tuwien.auto.calimero.process.ProcessCommunicationBase.SCALING;
 
@@ -11,6 +12,7 @@ import org.slf4j.LoggerFactory;
 
 import tuwien.auto.calimero.DetachEvent;
 import tuwien.auto.calimero.GroupAddress;
+import tuwien.auto.calimero.process.ProcessCommunicator;
 import tuwien.auto.calimero.process.ProcessEvent;
 
 /**
@@ -20,56 +22,83 @@ public class KnxDimmerProcessListener extends AbstractDimmerProcessListener {
 
 	protected static final Logger logger = LoggerFactory.getLogger(KnxDimmerProcessListener.class);
 
+	private final ProcessCommunicator pc;
 	private final GroupAddress onOff;
+	private final Optional<GroupAddress> precenseDetectorLock;
+	private final Optional<GroupAddress> onOffOverride;
 	private final Optional<GroupAddress> dim;
 	private final Optional<GroupAddress> dimAbsolute;
 	private int minDimVal = 1;
 
-	KnxDimmerProcessListener(final GroupAddress onOff, final Optional<GroupAddress> dim, final Optional<GroupAddress> dimAbsolute, final Optional<Integer> minDimVal,
-			Dimmer dimmer) {
+	KnxDimmerProcessListener(final GroupAddress onOff, final Optional<GroupAddress> onOffOverride, final Optional<GroupAddress> precenseDetectorLock,
+			final Optional<GroupAddress> dim, final Optional<GroupAddress> dimAbsolute, final Optional<Integer> minDimVal, Dimmer dimmer) {
 		this.onOff = onOff;
 		this.dim = dim;
 		this.dimAbsolute = dimAbsolute;
+		this.onOffOverride = onOffOverride;
+		this.precenseDetectorLock = precenseDetectorLock;
 		if (minDimVal.isPresent()) {
 			this.minDimVal = minDimVal.get();
 		}
 
+		this.pc = getInstance().getKnxConnectionFactory().createProcessCommunicator();
 		setDimmer(dimmer);
 	}
 
 	@Override
 	public void groupWrite(final ProcessEvent e) {
-		if (dim.isPresent() && e.getDestination().equals(dim.get())) {
-			try {
+		try {
+
+			if (dim.isPresent() && e.getDestination().equals(dim.get())) {
 				dimmer.interrupt();
 				boolean b = asBool(e);
 
 				if (b) {
-					dimmer.putCommand(new DimmerCommand(dimmer.getLastDimDirection() == UP ? new BigDecimal(minDimVal) : new BigDecimal(100), e.getSourceAddr()));
+					DimmerCommand dimmerCommand = new DimmerCommand(dimmer.getLastDimDirection() == UP ? new BigDecimal(minDimVal) : new BigDecimal(100),
+							e.getSourceAddr());
+					if (onOffOverride.isPresent()) {
+						pc.write(precenseDetectorLock.get(), true);
+						dimmerCommand.setOverride();
+					}
+					dimmer.putCommand(dimmerCommand);
 				}
-			} catch (Exception ex) {
-				logger.error("Could not process KNX dim command", ex);
 			}
-		}
 
-		if (dimAbsolute.isPresent() && e.getDestination().equals(dimAbsolute.get())) {
-			try {
+			if (dimAbsolute.isPresent() && e.getDestination().equals(dimAbsolute.get())) {
 				dimmer.interrupt();
 				int i = asUnsigned(e, SCALING);
-				dimmer.putCommand(new DimmerCommand(new BigDecimal(i), e.getSourceAddr()));
-			} catch (Exception ex) {
-				logger.error("Could not process KNX dim command", ex);
+				DimmerCommand dimmerCommand = new DimmerCommand(new BigDecimal(i), e.getSourceAddr());
+				if (onOffOverride.isPresent()) {
+					pc.write(precenseDetectorLock.get(), true);
+					dimmerCommand.setOverride();
+				}
+				dimmer.putCommand(dimmerCommand);
 			}
-		}
 
-		if (e.getDestination().equals(onOff)) {
-			try {
+			if (e.getDestination().equals(onOff)) {
+				if (dimmer.getLastDimCommand().isPresent() && dimmer.getLastDimCommand().get().isOverride()) {
+					return;
+				}
 				dimmer.interrupt();
 				boolean b = asBool(e);
-				dimmer.putCommand(new DimmerCommand(b ? new BigDecimal(100) : new BigDecimal(0), e.getSourceAddr()));
-			} catch (Exception ex) {
-				logger.error("Could not process KNX dim command", ex);
+				DimmerCommand dimmerCommand = new DimmerCommand(b ? new BigDecimal(100) : new BigDecimal(0), e.getSourceAddr());
+				dimmer.putCommand(dimmerCommand);
 			}
+
+			if (onOffOverride.isPresent() && e.getDestination().equals(onOffOverride.get())) {
+				dimmer.interrupt();
+				boolean b = asBool(e);
+				DimmerCommand dimmerCommand = new DimmerCommand(b ? new BigDecimal(100) : new BigDecimal(0), e.getSourceAddr());
+				if (b) {
+					pc.write(precenseDetectorLock.get(), true);
+					dimmerCommand.setOverride();
+				} else {
+					pc.write(precenseDetectorLock.get(), false);
+				}
+				dimmer.putCommand(dimmerCommand);
+			}
+		} catch (Exception ex) {
+			logger.error("Could not process KNX dim command", ex);
 		}
 	}
 

@@ -1,4 +1,4 @@
-package be.error.rpi.dac.dimmer.config.dimmers;
+package be.error.rpi.dac.dimmer.config.dimmers.gv;
 
 import static be.error.rpi.dac.dimmer.config.DimmerName.KEUKEN;
 
@@ -6,9 +6,6 @@ import be.error.rpi.dac.dimmer.builder.Dimmer;
 import be.error.rpi.dac.dimmer.builder.DimmerBuilder;
 import be.error.rpi.dac.dimmer.config.DimmerConfig;
 
-/**
- * Created by koen on 01.10.16.
- */
 public class DimmerKeuken implements DimmerConfig {
 
 	@Override
@@ -23,7 +20,7 @@ public class DimmerKeuken implements DimmerConfig {
 				outputGroupAddressesForActorSwitchingOnAndOff("5/0/6", "5/0/7");
 				outputGroupAddressesForVisualisationStatusFeedback("15/0/5");
 				outputGroupAddressesForSwitchLedControl("5/0/3");
-				outputSwitchUpdateGroupAddresses("5/0/5");
+				outputGroupAddressesSwitchUpdate("5/0/5");
 				inputGroupAddressForOnAndOff("5/0/5");
 				inputGroupAddressForDimStartAndStop("5/0/4");
 				inputGroupAddressForAbsoluteDimValue("14/0/5");

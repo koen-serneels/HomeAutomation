@@ -1,4 +1,4 @@
-package be.error.rpi.dac.dimmer.config.dimmers;
+package be.error.rpi.dac.dimmer.config.dimmers.gv;
 
 import static be.error.rpi.dac.dimmer.config.DimmerName.EETHOEK;
 
@@ -23,7 +23,7 @@ public class DimmerEethoek implements DimmerConfig {
 				outputGroupAddressesForActorSwitchingOnAndOff("5/1/8", "5/1/7");
 				outputGroupAddressesForVisualisationStatusFeedback("15/0/6");
 				outputGroupAddressesForSwitchLedControl("5/1/4");
-				outputSwitchUpdateGroupAddresses("5/1/6");
+				outputGroupAddressesSwitchUpdate("5/1/6");
 				inputGroupAddressForOnAndOff("5/1/6");
 				inputGroupAddressForDimStartAndStop("5/1/5");
 				inputGroupAddressForAbsoluteDimValue("14/0/6");

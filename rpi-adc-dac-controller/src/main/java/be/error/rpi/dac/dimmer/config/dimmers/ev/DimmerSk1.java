@@ -1,4 +1,4 @@
-package be.error.rpi.dac.dimmer.config.dimmers;
+package be.error.rpi.dac.dimmer.config.dimmers.ev;
 
 import static be.error.rpi.dac.dimmer.config.DimmerName.SK1;
 

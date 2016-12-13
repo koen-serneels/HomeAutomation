@@ -19,6 +19,8 @@ public class DimmerCommand {
 	private boolean useThisDimCommandOnSceneDeativate;
 	private Optional<SceneContext> sceneContext = empty();
 
+	private boolean override;
+
 	public DimmerCommand(final BigDecimal targetVal, final IndividualAddress origin, SceneContext sceneContext, boolean useThisDimCommandOnSceneDeativate) {
 		this(targetVal, origin, sceneContext);
 		this.useThisDimCommandOnSceneDeativate = useThisDimCommandOnSceneDeativate;
@@ -32,6 +34,14 @@ public class DimmerCommand {
 	public DimmerCommand(final BigDecimal targetVal, final IndividualAddress origin) {
 		this.targetVal = targetVal;
 		this.origin = origin;
+	}
+
+	public void setOverride() {
+		override = true;
+	}
+
+	public boolean isOverride() {
+		return override;
 	}
 
 	public IndividualAddress getOrigin() {
