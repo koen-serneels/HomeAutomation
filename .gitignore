@@ -3,4 +3,5 @@ bin
 *.log
 .idea
 *.iml
+be/error/rpi/test/
 

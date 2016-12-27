@@ -23,6 +23,30 @@
 		</encoder>
 	</appender>
 
+	<appender name="FILE_VENT" class="ch.qos.logback.core.rolling.RollingFileAppender">
+		<file>vent.log</file>
+		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+			<fileNamePattern>vent.%d{yyyy-MM-dd}.log</fileNamePattern>
+			<maxHistory>30</maxHistory>
+			<totalSizeCap>1GB</totalSizeCap>
+		</rollingPolicy>
+		<encoder>
+			<pattern>%d{"yyyy-MM-dd'T'HH:mm:ss,SSS"} %d [%thread] %-5level %logger{35} - %msg%n</pattern>
+		</encoder>
+	</appender>
+
+	<appender name="FILE_TEMP" class="ch.qos.logback.core.rolling.RollingFileAppender">
+		<file>temp.log</file>
+		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+			<fileNamePattern>temp.%d{yyyy-MM-dd}.log</fileNamePattern>
+			<maxHistory>30</maxHistory>
+			<totalSizeCap>1GB</totalSizeCap>
+		</rollingPolicy>
+		<encoder>
+			<pattern>%d{"yyyy-MM-dd'T'HH:mm:ss,SSS"} %d [%thread] %-5level %logger{35} - %msg%n</pattern>
+		</encoder>
+	</appender>
+
 	<appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
 		<encoder>
 			<pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
@@ -36,4 +60,13 @@
 	<logger name="gang" level="debug" additivity="false">
 		<appender-ref ref="FILE_GANG" />
 	</logger>
+
+	<logger name="vent" level="debug" additivity="false">
+		<appender-ref ref="FILE_VENT"/>
+	</logger>
+
+	<logger name="temp" level="debug" additivity="false">
+		<appender-ref ref="FILE_TEMP"/>
+	</logger>
+
 </configuration>

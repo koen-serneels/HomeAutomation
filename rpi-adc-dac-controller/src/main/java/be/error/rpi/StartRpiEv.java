@@ -1,5 +1,6 @@
 package be.error.rpi;
 
+import static be.error.rpi.config.RunConfig.getInstance;
 import static be.error.rpi.config.RunConfig.initialize;
 
 import org.slf4j.Logger;
@@ -13,6 +14,8 @@ import be.error.rpi.dac.dimmer.config.dimmers.ev.DimmerBadkamer;
 import be.error.rpi.dac.dimmer.config.dimmers.ev.DimmerDressing;
 import be.error.rpi.dac.dimmer.config.dimmers.ev.DimmerNachthal;
 import be.error.rpi.dac.dimmer.config.dimmers.ev.DimmerSk1;
+import be.error.rpi.dac.dimmer.config.thermostat.Ev;
+import be.error.rpi.dac.dimmer.config.udpcallbacks.VentilationUdpCallback;
 
 /**
  * @author Koen Serneels
@@ -31,8 +34,11 @@ public class StartRpiEv {
 			public void run() {
 				try {
 					DacController dacController = new DacController();
+					Ev ev = new Ev();
 					dacController.run(new DimmerBadkamer(), new DimmerDressing(), new DimmerNachthal(), new DimmerSk1(), new DimmerAg(), new DimmerLzg(), new DimmerVg
 							());
+
+					getInstance().addUdpChannelCallback(new VentilationUdpCallback());
 				} catch (Exception e) {
 					logger.error("DacController got exception", e);
 				}

@@ -3,7 +3,6 @@ package be.error.rpi.dac.dimmer.config.scenes;
 import static be.error.rpi.adc.ObjectStatusTypeMapper.ObjectStatusType.CLOSED;
 import static be.error.rpi.adc.ObjectStatusTypeMapper.ObjectStatusType.OPEN;
 import static be.error.rpi.config.RunConfig.getInstance;
-import static be.error.rpi.dac.dimmer.builder.SceneContext.inactive;
 import static java.math.BigDecimal.ZERO;
 import static java.util.Optional.empty;
 import static java.util.Optional.of;
@@ -71,10 +70,10 @@ public class Gang implements Runnable {
 						logger.debug("Inkomhal dimmer:" + i + "" + armed());
 						if (i == 0) {
 							logger.debug("Inkomhal dimmer was 0, turning of gang" + armed());
-							dimmerGang.putCommand(new DimmerCommand(new BigDecimal(0), null, inactive(), true));
+							dimmerGang.putCommand(new DimmerCommand(new BigDecimal(0), null));
 						} else if (armed.isPresent() && armed.get()) {
 							logger.debug("Inkomhal dimmer was <> 0 and gang is armed, setting gang to:" + i + "" + armed());
-							dimmerGang.putCommand(new DimmerCommand(new BigDecimal(i), null, inactive(), true));
+							dimmerGang.putCommand(new DimmerCommand(new BigDecimal(i), null));
 						} else {
 							logger.debug("Inkomhal dimmer was <> 0 but gang is not armed" + armed());
 						}
@@ -113,6 +112,6 @@ public class Gang implements Runnable {
 	}
 
 	public String armed() {
-		return " [armed:" + (armed.isPresent() ? armed.get() : "N/A") + "]";
+		return " [armed:" + (armed.isPresent() ? armed.get() : "N/A") + "]" + " [motionVg:" + motionVg + "]";
 	}
 }

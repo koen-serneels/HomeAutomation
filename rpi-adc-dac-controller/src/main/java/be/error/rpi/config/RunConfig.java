@@ -18,6 +18,8 @@ import tuwien.auto.calimero.exception.KNXException;
 import be.error.rpi.adc.ObjectStatusTypeMapper.ObjectStatusType;
 import be.error.rpi.dac.i2c.I2CCommunicator;
 import be.error.rpi.knx.KnxConnectionFactory;
+import be.error.rpi.knx.UdpChannel;
+import be.error.rpi.knx.UdpChannel.UdpChannelCallback;
 
 /**
  * @author Koen Serneels
@@ -35,16 +37,21 @@ public class RunConfig {
 	private final String KNX_IP = "192.168.0.6";
 	private final int KNX_PORT = 3671;
 
-	private final int DAC_LISTEN_PORT = 8000;
+	private final String EBUSD_IP = "192.168.0.10";
+	private final int EBUSD_PORT = 8888;
+
+	private final int UDP_CHAN_PORT = 8010;
 
 	private I2CBus bus;
 	private I2CCommunicator i2CCommunicator;
+	private UdpChannel udpChannel;
 
 	private EventBus adcEventBus = new EventBus();
 
 	private static RunConfig runConfig;
 
 	private RunConfig(String localIp) {
+
 		LOCAL_IP = localIp;
 		try {
 			LOXONE_IA = new IndividualAddress("1.1.250");
@@ -70,6 +77,8 @@ public class RunConfig {
 			bus = I2CFactory.getInstance(BUS_1);
 			i2CCommunicator = new I2CCommunicator();
 			i2CCommunicator.start();
+			udpChannel = new UdpChannel(UDP_CHAN_PORT);
+			udpChannel.start();
 		} catch (Exception e) {
 			logger.error("Could not start I2CCommunicator", e);
 			throw new RuntimeException(e);
@@ -101,10 +110,6 @@ public class RunConfig {
 		return KNX_PORT;
 	}
 
-	public int getDacListenPort() {
-		return DAC_LISTEN_PORT;
-	}
-
 	public IndividualAddress getLoxoneIa() {
 		return LOXONE_IA;
 	}
@@ -121,11 +126,23 @@ public class RunConfig {
 		return i2CCommunicator;
 	}
 
+	public int getEbusdPort() {
+		return EBUSD_PORT;
+	}
+
+	public String getEbusdIp() {
+		return EBUSD_IP;
+	}
+
 	public void registerAdcEventListener(Object o) {
 		adcEventBus.register(o);
 	}
 
 	public void postAdcEvent(List<Pair<String, ObjectStatusType>> list) {
 		adcEventBus.post(list);
+	}
+
+	public void addUdpChannelCallback(UdpChannelCallback... udpChannelCallbacks) {
+		udpChannel.addUdpChannelCallback(udpChannelCallbacks);
 	}
 }

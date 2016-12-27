@@ -1,4 +1,4 @@
-package be.error.rpi.dac.dimmer.builder;
+package be.error.rpi.support;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -12,9 +12,9 @@ import tuwien.auto.calimero.exception.KNXException;
 /**
  * @author Koen Serneels
  */
-public class DimmerSupport {
+public class Support {
 
-	private static final Logger logger = LoggerFactory.getLogger(DimmerSupport.class);
+	private static final Logger logger = LoggerFactory.getLogger(Support.class);
 
 	public static GroupAddress createGroupAddress(String groupAddress) {
 		try {
@@ -25,7 +25,7 @@ public class DimmerSupport {
 		}
 	}
 
-	public static byte[] convertDimPercentageToDacBytes(BigDecimal bigDecimal) {
+	public static byte[] convertPercentageToDacBytes(BigDecimal bigDecimal) {
 		BigDecimal result = new BigDecimal(1023).divide(new BigDecimal(100)).multiply(bigDecimal).setScale(0, RoundingMode.HALF_UP);
 		byte[] b = result.toBigInteger().toByteArray();
 		if (b.length == 1) {

@@ -25,6 +25,7 @@ import tuwien.auto.calimero.dptxlator.DPTXlator8BitUnsigned;
 import tuwien.auto.calimero.process.ProcessCommunicator;
 
 import be.error.rpi.dac.dimmer.config.DimmerName;
+import be.error.rpi.support.Support;
 
 /**
  * @author Koen Serneels
@@ -214,8 +215,8 @@ public class Dimmer extends Thread {
 	}
 
 	private void dim(BigDecimal targetValue) throws IOException {
-		byte[] b = DimmerSupport.convertDimPercentageToDacBytes(targetValue);
-		getInstance().getI2CCommunicator().write(boardAddress, channel, new byte[] { (byte) channel, b[1], b[0] });
+		byte[] b = Support.convertPercentageToDacBytes(targetValue);
+		getInstance().getI2CCommunicator().write(boardAddress, channel, b);
 	}
 
 	public BigDecimal getCurVal() {

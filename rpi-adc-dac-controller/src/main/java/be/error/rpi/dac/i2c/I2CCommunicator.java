@@ -1,6 +1,8 @@
 package be.error.rpi.dac.i2c;
 
 import static be.error.rpi.config.RunConfig.getInstance;
+import static org.apache.commons.lang3.ArrayUtils.add;
+import static org.apache.commons.lang3.ArrayUtils.reverse;
 
 import java.io.IOException;
 import java.math.BigInteger;
@@ -45,7 +47,8 @@ public class I2CCommunicator extends Thread {
 		writeCommand.boardAddress = boardAddress;
 		writeCommand.i2cDevice = getInstance().getBus().getDevice(boardAddress);
 		writeCommand.channel = channel;
-		writeCommand.value = b;
+		reverse(b);
+		writeCommand.value = add(b, 0, (byte) channel);
 		try {
 			commandQueue.put(writeCommand);
 		} catch (InterruptedException interruptedException) {

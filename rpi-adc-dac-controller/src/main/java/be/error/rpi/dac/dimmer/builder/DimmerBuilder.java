@@ -1,7 +1,7 @@
 package be.error.rpi.dac.dimmer.builder;
 
 import static be.error.rpi.config.RunConfig.getInstance;
-import static be.error.rpi.dac.dimmer.builder.DimmerSupport.createGroupAddress;
+import static be.error.rpi.support.Support.createGroupAddress;
 import static java.util.Arrays.asList;
 import static java.util.Optional.empty;
 import static java.util.Optional.of;

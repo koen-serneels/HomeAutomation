@@ -19,9 +19,11 @@ public class DimmerAg implements DimmerConfig {
 
 				outputGroupAddressesForActorSwitchingOnAndOff("1/2/0");
 				outputGroupAddressesForVisualisationStatusFeedback("15/0/13");
-				outputGroupAddressesForSwitchLedControl("1/2/2");
 				outputGroupAddressesSwitchUpdate("1/2/5");
-				inputGroupAddressForOnAndOff("1/2/4");
+
+				inputGroupAddressForOnOffOverride("1/2/4", "1/2/6");
+
+				inputGroupAddressForOnAndOff("1/2/1");
 				inputGroupAddressForDimStartAndStop("1/2/3");
 				inputGroupAddressForAbsoluteDimValue("14/0/13");
 			}
