@@ -1,8 +1,8 @@
-package be.error.rpi.dac.dimmer.config.udpcallbacks;
+package be.error.rpi.dac.dimmer.config.ventilation;
 
 import static be.error.rpi.config.RunConfig.getInstance;
+import static be.error.rpi.dac.support.Support.convertPercentageToDacBytes;
 import static be.error.rpi.knx.UdpChannelCommand.VENTILATIE;
-import static be.error.rpi.support.Support.convertPercentageToDacBytes;
 
 import java.math.BigDecimal;
 
@@ -38,6 +38,6 @@ public class VentilationUdpCallback implements UdpChannelCallback {
 			val = MIN_PCT;
 		}
 		getInstance().getI2CCommunicator().write(boardAddress, channel, convertPercentageToDacBytes(val));
-		logger.debug(s + " (send:" + val);
+		logger.debug(s + " (send:" + val + ")");
 	}
 }

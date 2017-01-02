@@ -1,6 +1,14 @@
 package be.error.rpi.ebus;
 
-public interface EbusCommand {
+import java.util.List;
 
-	String[] getCommands();
+public interface EbusCommand<R> {
+
+	String[] getEbusCommands();
+
+	R convertResult(List<String> results);
+
+	default boolean withResult() {
+		return false;
+	}
 }

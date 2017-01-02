@@ -25,7 +25,7 @@ import tuwien.auto.calimero.dptxlator.DPTXlator8BitUnsigned;
 import tuwien.auto.calimero.process.ProcessCommunicator;
 
 import be.error.rpi.dac.dimmer.config.DimmerName;
-import be.error.rpi.support.Support;
+import be.error.rpi.dac.support.Support;
 
 /**
  * @author Koen Serneels

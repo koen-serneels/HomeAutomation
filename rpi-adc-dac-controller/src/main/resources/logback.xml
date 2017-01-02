@@ -35,8 +35,8 @@
 		</encoder>
 	</appender>
 
-	<appender name="FILE_TEMP" class="ch.qos.logback.core.rolling.RollingFileAppender">
-		<file>temp.log</file>
+	<appender name="FILE_EBUSD" class="ch.qos.logback.core.rolling.RollingFileAppender">
+		<file>ebusd.log</file>
 		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
 			<fileNamePattern>temp.%d{yyyy-MM-dd}.log</fileNamePattern>
 			<maxHistory>30</maxHistory>
@@ -65,8 +65,8 @@
 		<appender-ref ref="FILE_VENT"/>
 	</logger>
 
-	<logger name="temp" level="debug" additivity="false">
-		<appender-ref ref="FILE_TEMP"/>
+	<logger name="ebusd" level="debug" additivity="false">
+		<appender-ref ref="FILE_EBUSD"/>
 	</logger>
 
 </configuration>

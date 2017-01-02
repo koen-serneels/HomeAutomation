@@ -1,7 +1,13 @@
 package be.error.rpi;
 
+import static be.error.rpi.config.RunConfig.getInstance;
 import static be.error.rpi.config.RunConfig.initialize;
+import static org.quartz.CronScheduleBuilder.cronSchedule;
+import static org.quartz.JobBuilder.newJob;
+import static org.quartz.TriggerBuilder.newTrigger;
 
+import org.quartz.CronExpression;
+import org.quartz.Scheduler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -18,6 +24,7 @@ import be.error.rpi.dac.dimmer.config.dimmers.gv.DimmerWc;
 import be.error.rpi.dac.dimmer.config.dimmers.gv.DimmerZitHoek;
 import be.error.rpi.dac.dimmer.config.scenes.Gang;
 import be.error.rpi.dac.dimmer.config.scenes.GvComfort;
+import be.error.rpi.dac.dimmer.config.temperaturecontrol.OutsideTemperatureJob;
 
 /**
  * @author Koen Serneels
@@ -69,6 +76,20 @@ public class StartRpiGv {
 					new GvComfort(dimmerEethoek, dimmerZithoek, dimmerKeuken).run();
 				} catch (Exception e) {
 					logger.error("DacController got exception. Restarting", e);
+				}
+			}
+		}.start();
+
+		new Thread() {
+			@Override
+			public void run() {
+				try {
+					Scheduler scheduler = getInstance().getScheduler();
+					scheduler.scheduleJob(newJob(OutsideTemperatureJob.class).build(),
+							newTrigger().withIdentity("OutsideTemperatureJob").withSchedule(cronSchedule(new CronExpression("0 0/5 * * * ?"))).startNow().build());
+					scheduler.start();
+				} catch (Exception e) {
+					logger.error("Scheduler got exception. Restarting", e);
 				}
 			}
 		}.start();

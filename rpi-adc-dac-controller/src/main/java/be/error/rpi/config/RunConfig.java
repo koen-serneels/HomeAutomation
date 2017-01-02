@@ -5,6 +5,9 @@ import static com.pi4j.io.i2c.I2CBus.BUS_1;
 import java.util.List;
 
 import org.apache.commons.lang3.tuple.Pair;
+import org.quartz.Scheduler;
+import org.quartz.SchedulerException;
+import org.quartz.impl.StdSchedulerFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -42,6 +45,8 @@ public class RunConfig {
 
 	private final int UDP_CHAN_PORT = 8010;
 
+	private final Scheduler scheduler;
+
 	private I2CBus bus;
 	private I2CCommunicator i2CCommunicator;
 	private UdpChannel udpChannel;
@@ -57,6 +62,12 @@ public class RunConfig {
 			LOXONE_IA = new IndividualAddress("1.1.250");
 		} catch (KNXException knxException) {
 			throw new RuntimeException(knxException);
+		}
+
+		try {
+			scheduler = StdSchedulerFactory.getDefaultScheduler();
+		} catch (SchedulerException e) {
+			throw new RuntimeException(e);
 		}
 	}
 
@@ -144,5 +155,9 @@ public class RunConfig {
 
 	public void addUdpChannelCallback(UdpChannelCallback... udpChannelCallbacks) {
 		udpChannel.addUdpChannelCallback(udpChannelCallbacks);
+	}
+
+	public Scheduler getScheduler() {
+		return scheduler;
 	}
 }

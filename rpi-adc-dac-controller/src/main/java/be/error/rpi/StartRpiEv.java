@@ -2,7 +2,12 @@ package be.error.rpi;
 
 import static be.error.rpi.config.RunConfig.getInstance;
 import static be.error.rpi.config.RunConfig.initialize;
+import static org.quartz.CronScheduleBuilder.cronSchedule;
+import static org.quartz.JobBuilder.newJob;
+import static org.quartz.TriggerBuilder.newTrigger;
 
+import org.quartz.CronExpression;
+import org.quartz.Scheduler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -14,8 +19,9 @@ import be.error.rpi.dac.dimmer.config.dimmers.ev.DimmerBadkamer;
 import be.error.rpi.dac.dimmer.config.dimmers.ev.DimmerDressing;
 import be.error.rpi.dac.dimmer.config.dimmers.ev.DimmerNachthal;
 import be.error.rpi.dac.dimmer.config.dimmers.ev.DimmerSk1;
-import be.error.rpi.dac.dimmer.config.thermostat.Ev;
-import be.error.rpi.dac.dimmer.config.udpcallbacks.VentilationUdpCallback;
+import be.error.rpi.dac.dimmer.config.temperaturecontrol.Ev;
+import be.error.rpi.dac.dimmer.config.temperaturecontrol.HeatingCircuitStatusJob;
+import be.error.rpi.dac.dimmer.config.ventilation.VentilationUdpCallback;
 
 /**
  * @author Koen Serneels
@@ -41,6 +47,20 @@ public class StartRpiEv {
 					getInstance().addUdpChannelCallback(new VentilationUdpCallback());
 				} catch (Exception e) {
 					logger.error("DacController got exception", e);
+				}
+			}
+		}.start();
+
+		new Thread() {
+			@Override
+			public void run() {
+				try {
+					Scheduler scheduler = getInstance().getScheduler();
+					scheduler.scheduleJob(newJob(HeatingCircuitStatusJob.class).withIdentity("HeatingCircuitStatusJob.class.getName()").build(),
+							newTrigger().withIdentity("HeatingCircuitStatusJob").withSchedule(cronSchedule(new CronExpression("0 0/5 * * * ?"))).startNow().build());
+					scheduler.start();
+				} catch (Exception e) {
+					logger.error("Scheduler got exception. Restarting", e);
 				}
 			}
 		}.start();
