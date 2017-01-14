@@ -1,7 +1,5 @@
 package be.error.rpi.tools;
 
-import static be.error.rpi.config.RunConfig.getInstance;
-import static java.lang.Thread.sleep;
 import static org.apache.commons.lang3.StringUtils.leftPad;
 
 import java.io.BufferedReader;
@@ -12,9 +10,6 @@ import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Created by koen on 01.07.16.
- */
 public class EbusRegisterReader {
 
 	public static void main(String[] args) throws Exception {
@@ -31,7 +26,6 @@ public class EbusRegisterReader {
 				String result = in.readLine();
 				System.err.println(cmd + " - " + result);
 				in.readLine();
-				sleep(20);
 			}
 			out.close();
 			in.close();

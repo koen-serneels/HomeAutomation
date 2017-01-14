@@ -18,7 +18,7 @@ import tuwien.auto.calimero.GroupAddress;
 import tuwien.auto.calimero.process.ProcessEvent;
 
 import be.error.rpi.dac.dimmer.builder.AbstractDimmerProcessListener;
-import be.error.rpi.ebus.EbusdTcpCommunicator;
+import be.error.rpi.ebus.EbusdTcpCommunicatorImpl;
 import be.error.rpi.ebus.commands.SetCurrentRoomTemperature;
 import be.error.rpi.ebus.commands.SetDesiredRoomTemperature;
 import be.error.rpi.knx.UdpChannel.UdpChannelCallback;
@@ -44,7 +44,7 @@ public class Ev {
 			@Override
 			public void callBack(final String s) throws Exception {
 				logger.debug("Setting desired temp EV to " + s);
-				new EbusdTcpCommunicator().send(new SetDesiredRoomTemperature(s));
+				new EbusdTcpCommunicatorImpl().send(new SetDesiredRoomTemperature(s));
 			}
 		});
 
@@ -55,7 +55,7 @@ public class Ev {
 					try {
 						Double temp = super.asFloat(e, false);
 						logger.debug("Setting current temp EV to " + temp);
-						new EbusdTcpCommunicator().send(new SetCurrentRoomTemperature("" + temp));
+						new EbusdTcpCommunicatorImpl().send(new SetCurrentRoomTemperature("" + temp));
 						getInstance().getScheduler().scheduleJob(newJob(HeatingCircuitStatusJob.class).build(),
 								newTrigger().startAt(DateUtils.addSeconds(new Date(), 30)).withSchedule(simpleSchedule().withRepeatCount(0)).build());
 					} catch (Exception exception) {

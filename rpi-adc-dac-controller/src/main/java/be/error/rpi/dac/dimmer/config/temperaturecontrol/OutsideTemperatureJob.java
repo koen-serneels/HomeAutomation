@@ -13,6 +13,7 @@ import org.slf4j.LoggerFactory;
 import tuwien.auto.calimero.GroupAddress;
 
 import be.error.rpi.ebus.EbusdTcpCommunicator;
+import be.error.rpi.ebus.EbusdTcpCommunicatorImpl;
 import be.error.rpi.ebus.commands.GetOutsideTemperature;
 import be.error.rpi.knx.Support;
 
@@ -27,7 +28,7 @@ public class OutsideTemperatureJob implements Job {
 		try {
 			logger.debug("Requesting outside temp");
 			GetOutsideTemperature getOutsideTemperature = new GetOutsideTemperature();
-			BigDecimal result = getOutsideTemperature.convertResult(new EbusdTcpCommunicator().send(getOutsideTemperature));
+			BigDecimal result = getOutsideTemperature.convertResult(new EbusdTcpCommunicatorImpl().send(getOutsideTemperature));
 			logger.debug("Communicating outside temp " + result + "°C to " + outsideTempGa);
 			getInstance().getKnxConnectionFactory().createProcessCommunicator().write(outsideTempGa, result.floatValue(), false);
 		} catch (Exception e) {

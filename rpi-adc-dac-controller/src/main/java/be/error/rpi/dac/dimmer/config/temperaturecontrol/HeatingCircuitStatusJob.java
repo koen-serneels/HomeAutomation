@@ -11,6 +11,7 @@ import org.slf4j.LoggerFactory;
 import tuwien.auto.calimero.GroupAddress;
 
 import be.error.rpi.ebus.EbusdTcpCommunicator;
+import be.error.rpi.ebus.EbusdTcpCommunicatorImpl;
 import be.error.rpi.ebus.commands.HeatingCircuitStatus;
 import be.error.rpi.knx.Support;
 
@@ -25,7 +26,7 @@ public class HeatingCircuitStatusJob implements Job {
 		try {
 			logger.debug("Requesting heating circuit status");
 			HeatingCircuitStatus heatingCircuitStatus = new HeatingCircuitStatus();
-			boolean result = heatingCircuitStatus.convertResult(new EbusdTcpCommunicator().send(heatingCircuitStatus));
+			boolean result = heatingCircuitStatus.convertResult(new EbusdTcpCommunicatorImpl().send(heatingCircuitStatus));
 			logger.debug("Communicating requesting heating circuit status " + result + " " + heatingCircuitStatusGa);
 			getInstance().getKnxConnectionFactory().createProcessCommunicator().write(heatingCircuitStatusGa, result);
 		} catch (Exception e) {
