@@ -1,11 +1,10 @@
 package be.error.rpi.dac.dimmer.config.dimmers.ev;
 
-import static be.error.rpi.dac.dimmer.config.DimmerName.DRESSING;
+import static be.error.types.LocationId.DRESSING;
 
 import be.error.rpi.dac.dimmer.builder.Dimmer;
 import be.error.rpi.dac.dimmer.builder.DimmerBuilder;
 import be.error.rpi.dac.dimmer.config.DimmerConfig;
-import be.error.rpi.dac.dimmer.config.DimmerName;
 
 /**
  * @author Koen Serneels

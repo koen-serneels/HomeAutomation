@@ -10,8 +10,8 @@ import java.math.BigDecimal;
 
 public class Support {
 
-	public static String addTemperatureToCommand(String command, String temperature, int offset) {
-		String converted = encodeDATA2c(new BigDecimal(temperature).setScale(2, ROUND_FLOOR).add(new BigDecimal(offset)));
+	public static String addTemperatureToCommand(String command, BigDecimal temperature, int offset) {
+		String converted = encodeDATA2c(temperature.add(new BigDecimal(offset)));
 		return format(command, substring(converted, 2, 4), substring(converted, 0, 2));
 	}
 
@@ -30,6 +30,4 @@ public class Support {
 	private static byte[] encodeInt(short data) {
 		return new byte[] { (byte) (data >> 8), (byte) data };
 	}
-
-
 }

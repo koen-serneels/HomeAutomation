@@ -2,15 +2,16 @@ package be.error.rpi.ebus.commands;
 
 import static be.error.rpi.ebus.Support.addTemperatureToCommand;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 import be.error.rpi.ebus.EbusCommand;
 
 public class SetDesiredRoomTemperature implements EbusCommand<Void> {
 
-	private String temperature;
+	private BigDecimal temperature;
 
-	public SetDesiredRoomTemperature(final String temperature) {
+	public SetDesiredRoomTemperature(final BigDecimal temperature) {
 		this.temperature = temperature;
 	}
 

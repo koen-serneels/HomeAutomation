@@ -1,6 +1,6 @@
 package be.error.rpi.dac.dimmer.config.dimmers.ev;
 
-import static be.error.rpi.dac.dimmer.config.DimmerName.BADKAMER;
+import static be.error.types.LocationId.BADKAMER;
 
 import be.error.rpi.dac.dimmer.builder.Dimmer;
 import be.error.rpi.dac.dimmer.builder.DimmerBuilder;

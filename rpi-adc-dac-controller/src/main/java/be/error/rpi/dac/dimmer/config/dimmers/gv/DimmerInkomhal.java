@@ -1,6 +1,6 @@
 package be.error.rpi.dac.dimmer.config.dimmers.gv;
 
-import static be.error.rpi.dac.dimmer.config.DimmerName.INKOMHAL;
+import static be.error.types.LocationId.INKOMHAL;
 
 import be.error.rpi.dac.dimmer.builder.Dimmer;
 import be.error.rpi.dac.dimmer.builder.DimmerBuilder;

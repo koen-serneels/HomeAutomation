@@ -1,7 +1,6 @@
 package be.error.rpi.dac.dimmer.config.dimmers.buiten;
 
-import static be.error.rpi.dac.dimmer.config.DimmerName.VG;
-import static be.error.rpi.dac.dimmer.config.DimmerName.VOORDEUR;
+import static be.error.types.LocationId.VG;
 
 import be.error.rpi.dac.dimmer.builder.Dimmer;
 import be.error.rpi.dac.dimmer.builder.DimmerBuilder;
