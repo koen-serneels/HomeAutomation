@@ -1,16 +1,13 @@
 package be.error.rpi.heating;
 
-import static org.mockito.Mockito.mock;
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
 import static org.testng.AssertJUnit.assertTrue;
 
 import java.math.BigDecimal;
 
 import org.testng.annotations.Test;
 
-import be.error.rpi.ebus.EbusdTcpCommunicator;
-import be.error.rpi.ebus.commands.*;
-import be.error.rpi.heating.HeatingController.RoomTemperatureInfo;
 import be.error.types.LocationId;
 
 @Test
@@ -53,9 +50,32 @@ public class ControlValueCalculatorTest {
 	public void testHasHeatingDemand() throws Exception {
 		ControlValueCalculator controlValueCalculator = new ControlValueCalculator();
 
-		assertTrue(controlValueCalculator.hasHeatingDemand(create("22.50", "23.00")));
-		assertTrue(controlValueCalculator.hasHeatingDemand(create("22.70", "23.00")));
-		assertTrue(controlValueCalculator.hasHeatingDemand(create("22.80", "23.00")));
+		assertTrue(controlValueCalculator.updateHeatingDemand(create("22.40", "23.00")).getHeatingDemand());
+		assertTrue(controlValueCalculator.updateHeatingDemand(create("22.50", "23.00")).getHeatingDemand());
+		assertTrue(controlValueCalculator.updateHeatingDemand(create("22.70", "23.00")).getHeatingDemand());
+		assertTrue(controlValueCalculator.updateHeatingDemand(create("22.80", "23.00")).getHeatingDemand());
+		assertTrue(controlValueCalculator.updateHeatingDemand(create("23.10", "23.00")).getHeatingDemand());
+		assertFalse(controlValueCalculator.updateHeatingDemand(create("23.11", "23.00")).getHeatingDemand());
+
+		RoomTemperature roomTemperature = controlValueCalculator.updateHeatingDemand(create("22.80", "23.00"));
+		roomTemperature.updateHeatingDemand(false);
+		assertFalse(controlValueCalculator.updateHeatingDemand(roomTemperature).getHeatingDemand());
+		roomTemperature.updateHeatingDemand(true);
+		assertTrue(controlValueCalculator.updateHeatingDemand(roomTemperature).getHeatingDemand());
+
+		roomTemperature = controlValueCalculator.updateHeatingDemand(create("22.80", "23.00"));
+		roomTemperature.updateHeatingDemand(false);
+		assertFalse(controlValueCalculator.updateHeatingDemand(roomTemperature).getHeatingDemand());
+		roomTemperature.updateCurrentTemp(22.50);
+		assertTrue(controlValueCalculator.updateHeatingDemand(roomTemperature).getHeatingDemand());
+
+		roomTemperature = controlValueCalculator.updateHeatingDemand(create("22.80", "23.00"));
+		roomTemperature.updateHeatingDemand(true);
+		assertTrue(controlValueCalculator.updateHeatingDemand(roomTemperature).getHeatingDemand());
+		roomTemperature.updateCurrentTemp(23.00);
+		assertTrue(controlValueCalculator.updateHeatingDemand(roomTemperature).getHeatingDemand());
+		roomTemperature.updateCurrentTemp(23.12);
+		assertFalse(controlValueCalculator.updateHeatingDemand(roomTemperature).getHeatingDemand());
 	}
 
 	private RoomTemperature create(String current, String desired) {

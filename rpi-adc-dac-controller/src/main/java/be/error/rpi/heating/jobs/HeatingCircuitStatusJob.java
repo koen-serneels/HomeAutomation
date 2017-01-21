@@ -1,4 +1,4 @@
-package be.error.rpi.dac.dimmer.config.temperaturecontrol;
+package be.error.rpi.heating.jobs;
 
 import static be.error.rpi.config.RunConfig.getInstance;
 
@@ -10,7 +10,6 @@ import org.slf4j.LoggerFactory;
 
 import tuwien.auto.calimero.GroupAddress;
 
-import be.error.rpi.ebus.EbusdTcpCommunicator;
 import be.error.rpi.ebus.EbusdTcpCommunicatorImpl;
 import be.error.rpi.ebus.commands.HeatingCircuitStatus;
 import be.error.rpi.knx.Support;

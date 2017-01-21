@@ -1,10 +1,6 @@
 package be.error.rpi.heating;
 
-import static java.util.Optional.empty;
-import static java.util.Optional.of;
-
 import java.math.BigDecimal;
-import java.util.Optional;
 
 public class ControlValueCalculator {
 
@@ -25,17 +21,28 @@ public class ControlValueCalculator {
 		return currentTemp;
 	}
 
-	public Optional<Boolean> hasHeatingDemand(RoomTemperature roomTemperature) {
-		BigDecimal controlValue = getControlValue(roomTemperature.getCurrentTemp(), roomTemperature.getDesiredTemp());
+	public RoomTemperature updateHeatingDemand(RoomTemperature roomTemperature) {
+		BigDecimal currentTemp = roomTemperature.getCurrentTemp();
+		BigDecimal desiredTemp = roomTemperature.getDesiredTemp();
 
-		if (controlValue.compareTo(roomTemperature.getDesiredTemp().subtract(delta_trigger)) <= 0) {
-			return of(true);
+		//No state yet. In this case we simply check if the current temp vs required temp + delta_high. If lower or equal,enable heating demand. If higher, disable
+		// heating demand
+		if (roomTemperature.getHeatingDemand() == null) {
+			roomTemperature.updateHeatingDemand(currentTemp.compareTo(desiredTemp.add(delta_high)) <= 0);
+			return roomTemperature;
 		}
 
-		if (controlValue.compareTo(roomTemperature.getDesiredTemp()) >= 0) {
-			return of(false);
+		//If state is present, we only toggle the heating demand if a boundary is crossed
+		if (currentTemp.compareTo(desiredTemp.subtract(delta_low)) < 0) {
+			roomTemperature.updateHeatingDemand(true);
+			return roomTemperature;
 		}
 
-		return empty();
+		if (currentTemp.compareTo(desiredTemp.add(delta_high)) > 0) {
+			roomTemperature.updateHeatingDemand(false);
+			return roomTemperature;
+		}
+
+		return roomTemperature;
 	}
 }

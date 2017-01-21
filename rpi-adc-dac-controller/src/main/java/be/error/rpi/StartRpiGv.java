@@ -24,7 +24,7 @@ import be.error.rpi.dac.dimmer.config.dimmers.gv.DimmerWc;
 import be.error.rpi.dac.dimmer.config.dimmers.gv.DimmerZitHoek;
 import be.error.rpi.dac.dimmer.config.scenes.Gang;
 import be.error.rpi.dac.dimmer.config.scenes.GvComfort;
-import be.error.rpi.dac.dimmer.config.temperaturecontrol.OutsideTemperatureJob;
+import be.error.rpi.heating.jobs.OutsideTemperatureJob;
 
 /**
  * @author Koen Serneels

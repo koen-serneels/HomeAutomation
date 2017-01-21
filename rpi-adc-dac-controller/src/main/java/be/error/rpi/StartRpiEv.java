@@ -25,9 +25,10 @@ import be.error.rpi.dac.dimmer.config.dimmers.ev.DimmerBadkamer;
 import be.error.rpi.dac.dimmer.config.dimmers.ev.DimmerDressing;
 import be.error.rpi.dac.dimmer.config.dimmers.ev.DimmerNachthal;
 import be.error.rpi.dac.dimmer.config.dimmers.ev.DimmerSk1;
-import be.error.rpi.dac.dimmer.config.temperaturecontrol.HeatingCircuitStatusJob;
-import be.error.rpi.dac.dimmer.config.ventilation.VentilationUdpCallback;
+import be.error.rpi.dac.ventilation.VentilationUdpCallback;
 import be.error.rpi.heating.HeatingController;
+import be.error.rpi.heating.RoomTemperatureCollector;
+import be.error.rpi.heating.jobs.HeatingCircuitStatusJob;
 
 /**
  * @author Koen Serneels
@@ -76,12 +77,13 @@ public class StartRpiEv {
 			public void run() {
 				try {
 					HeatingController heatingController = new HeatingController();
-					heatingController.addRoomTemperatureProcessor(BADKAMER, createGroupAddress(""), createGroupAddress(""));
-					heatingController.addRoomTemperatureProcessor(DRESSING, createGroupAddress(""), createGroupAddress(""));
-					heatingController.addRoomTemperatureProcessor(SK1, createGroupAddress(""), createGroupAddress(""));
-					heatingController.addRoomTemperatureProcessor(SK2, createGroupAddress(""), createGroupAddress(""));
-					heatingController.addRoomTemperatureProcessor(SK3, createGroupAddress(""), createGroupAddress(""));
 					heatingController.start();
+
+					new RoomTemperatureCollector(BADKAMER, heatingController, createGroupAddress("10/0/4"), createGroupAddress("13/0/0")).start();
+					//new RoomTemperatureCollector(DRESSING, heatingController, createGroupAddress(""), createGroupAddress("13/1/0")).start();
+					new RoomTemperatureCollector(SK1, heatingController, createGroupAddress("10/0/0"), createGroupAddress("13/2/0")).start();
+					new RoomTemperatureCollector(SK2, heatingController, createGroupAddress("10/0/1"), createGroupAddress("13/3/0")).start();
+					new RoomTemperatureCollector(SK3, heatingController, createGroupAddress("10/0/2"), createGroupAddress("13/4/0")).start();
 				} catch (Exception e) {
 					logger.error("HEATING CONTROLLER DID NOT START", e);
 				}

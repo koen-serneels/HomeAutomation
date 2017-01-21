@@ -34,4 +34,5 @@ public enum UdpChannelCommand {
 	public static class Constants {
 		public static final String TEMPERATURE = "TEMP";
 	}
+
 }

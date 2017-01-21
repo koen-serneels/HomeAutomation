@@ -7,11 +7,9 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import be.error.rpi.heating.HeatingController.RoomTemperatureInfo;
-
 public class RoomTemperatureDeltaSorter {
 
-	private Logger logger = LoggerFactory.getLogger(RoomTemperatureDeltaSorter.class);
+	private static final Logger logger = LoggerFactory.getLogger("heating");
 
 	/**
 	 * This descending sorting results in positives delta's (current temp is lower than desired, they require heating) sorted highest first: the room with the
@@ -23,9 +21,8 @@ public class RoomTemperatureDeltaSorter {
 	 * negatives, we send the zero or negative instead. In this case it makes sense to send the delta that will be the closest to a potential heating demand in the near
 	 * future (=the least negative delta)
 	 */
-	public List<RoomTemperatureInfo> sortRoomTemperatureInfos(List<RoomTemperatureInfo> roomTemperatureInfos) {
-		List<RoomTemperatureInfo> list = roomTemperatureInfos.stream().sorted((l, r) -> r.getRoomTemperature().delta().compareTo(l.getRoomTemperature().delta()))
-				.collect(toList());
+	public List<RoomTemperature> sortRoomTemperatureInfos(List<RoomTemperature> roomTemperatureInfos) {
+		List<RoomTemperature> list = roomTemperatureInfos.stream().sorted((l, r) -> r.delta().compareTo(l.delta())).collect(toList());
 
 		logger.debug("Sorted room temperature list:" + list.toString());
 

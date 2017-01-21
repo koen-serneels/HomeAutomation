@@ -1,4 +1,4 @@
-package be.error.rpi.dac.dimmer.config.ventilation;
+package be.error.rpi.dac.ventilation;
 
 import static be.error.rpi.config.RunConfig.getInstance;
 import static be.error.rpi.dac.support.Support.convertPercentageToDacBytes;

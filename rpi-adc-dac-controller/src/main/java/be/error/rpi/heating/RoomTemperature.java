@@ -1,10 +1,14 @@
 package be.error.rpi.heating;
 
 import static java.math.BigDecimal.ROUND_FLOOR;
+import static java.util.Optional.empty;
+import static java.util.Optional.of;
 import static org.apache.commons.lang3.builder.ToStringBuilder.reflectionToString;
+import static org.apache.commons.lang3.builder.ToStringStyle.SHORT_PREFIX_STYLE;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
+import java.util.Optional;
 
 import org.apache.commons.lang3.SerializationUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
@@ -18,8 +22,7 @@ public class RoomTemperature implements Serializable {
 
 	private BigDecimal currentTemp;
 	private BigDecimal desiredTemp;
-
-	private boolean heatingDemand;
+	private Boolean heatingDemand;
 
 	public RoomTemperature(final LocationId roomId) {
 		this.roomId = roomId;
@@ -31,6 +34,11 @@ public class RoomTemperature implements Serializable {
 		this.desiredTemp = desiredTemp;
 	}
 
+	public void update(RoomTemperature roomTemperature) {
+		this.currentTemp = roomTemperature.getCurrentTemp();
+		this.desiredTemp = roomTemperature.getDesiredTemp();
+	}
+
 	public void updateCurrentTemp(Double currentTemp) {
 		this.currentTemp = new BigDecimal(currentTemp).setScale(2, ROUND_FLOOR);
 	}
@@ -39,8 +47,8 @@ public class RoomTemperature implements Serializable {
 		this.desiredTemp = new BigDecimal(desiredTemp).setScale(2, ROUND_FLOOR);
 	}
 
-	public void updateHeatingDemand(final boolean heatingDemand) {
-		this.heatingDemand = heatingDemand;
+	public void updateHeatingDemand(boolean b) {
+		this.heatingDemand = b;
 	}
 
 	public BigDecimal getCurrentTemp() {
@@ -63,17 +71,17 @@ public class RoomTemperature implements Serializable {
 		return desiredTemp.subtract(currentTemp);
 	}
 
-	public boolean isHeatingDemand() {
-		return heatingDemand;
-	}
-
 	public RoomTemperature clone() {
 		return SerializationUtils.clone(this);
 	}
 
+	public Boolean getHeatingDemand() {
+		return heatingDemand;
+	}
+
 	@Override
 	public String toString() {
-		return reflectionToString(this);
+		return reflectionToString(this, SHORT_PREFIX_STYLE);
 	}
 
 	@Override
