@@ -1,14 +1,16 @@
-package be.error.rpi.dac.dimmer.config;
+package be.error.types;
 
 /**
  * @author Koen Serneels
  */
-public enum DimmerName {
+public enum LocationId {
 
 	NACHTHAL("Nachthal"),
 	BADKAMER("Badkamer"),
 	DRESSING("Dressing"),
 	SK1("Slaapkamer1"),
+	SK2("Slaapkamer2"),
+	SK3("Slaapkamer3"),
 	KEUKEN("Keuken"),
 	EETHOEK("Eethoek"),
 	INKOMHAL("Inkomhal"),
@@ -25,7 +27,7 @@ public enum DimmerName {
 
 	private String dimmerDescription;
 
-	DimmerName(final String dimmerDescription) {
+	LocationId(final String dimmerDescription) {
 		this.dimmerDescription = dimmerDescription;
 	}
 }

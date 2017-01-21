@@ -1,8 +1,20 @@
 package be.error.rpi.knx;
 
+import static be.error.rpi.knx.UdpChannelCommand.Constants.TEMPERATURE;
+import static be.error.types.LocationId.BADKAMER;
+import static be.error.types.LocationId.DRESSING;
+import static be.error.types.LocationId.SK1;
+import static be.error.types.LocationId.SK2;
+import static be.error.types.LocationId.SK3;
+
 public enum UdpChannelCommand {
+
 	VENTILATIE("VENT"),
-	TEMPERATURE_EV("TEMP_EV");
+	TEMPERATURE_BADKAMER(TEMPERATURE + "_" + BADKAMER),
+	TEMPERATURE_DRESSING(TEMPERATURE + "_" + DRESSING),
+	TEMPERATURE_SK1(TEMPERATURE + "_" + SK1),
+	TEMPERATURE_SK2(TEMPERATURE + "_" + SK2),
+	TEMPERATURE_SK3(TEMPERATURE + "_" + SK3);
 
 	private String command;
 
@@ -18,4 +30,9 @@ public enum UdpChannelCommand {
 		}
 		throw new IllegalStateException("Unknown command " + s);
 	}
+
+	public static class Constants {
+		public static final String TEMPERATURE = "TEMP";
+	}
+
 }

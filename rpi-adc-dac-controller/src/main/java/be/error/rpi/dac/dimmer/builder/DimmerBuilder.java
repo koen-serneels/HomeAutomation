@@ -16,7 +16,7 @@ import org.slf4j.LoggerFactory;
 
 import tuwien.auto.calimero.GroupAddress;
 
-import be.error.rpi.dac.dimmer.config.DimmerName;
+import be.error.types.LocationId;
 
 /**
  * @author Koen Serneels
@@ -25,7 +25,7 @@ public class DimmerBuilder {
 
 	private static final Logger logger = LoggerFactory.getLogger(DimmerBuilder.class);
 
-	private DimmerName name;
+	private LocationId name;
 	private int boardAddress;
 	private int channel;
 
@@ -50,7 +50,7 @@ public class DimmerBuilder {
 	/**
 	 * The logical name of this dimmers instance. This is just an identifier for naming thread groups and debugging purposes
 	 */
-	public DimmerBuilder name(DimmerName name) {
+	public DimmerBuilder name(LocationId name) {
 		this.name = name;
 		return this;
 	}

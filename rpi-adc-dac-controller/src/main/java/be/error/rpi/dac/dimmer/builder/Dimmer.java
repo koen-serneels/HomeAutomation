@@ -24,7 +24,7 @@ import tuwien.auto.calimero.GroupAddress;
 import tuwien.auto.calimero.dptxlator.DPTXlator8BitUnsigned;
 import tuwien.auto.calimero.process.ProcessCommunicator;
 
-import be.error.rpi.dac.dimmer.config.DimmerName;
+import be.error.types.LocationId;
 import be.error.rpi.dac.support.Support;
 
 /**
@@ -54,7 +54,7 @@ public class Dimmer extends Thread {
 	private final AtomicBoolean interupt = new AtomicBoolean(false);
 	private final BlockingQueue<DimmerCommand> commandQueue = new LinkedBlockingDeque();
 
-	private final DimmerName dimmerName;
+	private final LocationId dimmerName;
 	private final int boardAddress;
 	private final int channel;
 
@@ -64,7 +64,7 @@ public class Dimmer extends Thread {
 	private Optional<DimmerCommand> lastDimCommand = empty();
 	private Optional<DimmerCommand> activeScene = empty();
 
-	public Dimmer(DimmerName dimmerName, int boardAddress, int channel, List<GroupAddress> switchGroupAddresses, List<GroupAddress> feedbackGroupAddresses,
+	public Dimmer(LocationId dimmerName, int boardAddress, int channel, List<GroupAddress> switchGroupAddresses, List<GroupAddress> feedbackGroupAddresses,
 			List<GroupAddress> switchLedControlGroupAddresses, List<GroupAddress> outputSwitchUpdateGroupAddresses) throws IOException {
 
 		this.dimmerName = dimmerName;

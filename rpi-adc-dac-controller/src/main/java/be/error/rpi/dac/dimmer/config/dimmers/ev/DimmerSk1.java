@@ -1,6 +1,6 @@
 package be.error.rpi.dac.dimmer.config.dimmers.ev;
 
-import static be.error.rpi.dac.dimmer.config.DimmerName.SK1;
+import static be.error.types.LocationId.SK1;
 
 import be.error.rpi.dac.dimmer.builder.Dimmer;
 import be.error.rpi.dac.dimmer.builder.DimmerBuilder;

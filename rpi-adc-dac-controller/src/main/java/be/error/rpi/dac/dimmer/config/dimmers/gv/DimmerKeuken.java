@@ -1,6 +1,6 @@
 package be.error.rpi.dac.dimmer.config.dimmers.gv;
 
-import static be.error.rpi.dac.dimmer.config.DimmerName.KEUKEN;
+import static be.error.types.LocationId.KEUKEN;
 
 import be.error.rpi.dac.dimmer.builder.Dimmer;
 import be.error.rpi.dac.dimmer.builder.DimmerBuilder;

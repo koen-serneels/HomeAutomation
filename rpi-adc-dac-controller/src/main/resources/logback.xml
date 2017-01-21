@@ -47,6 +47,18 @@
 		</encoder>
 	</appender>
 
+	<appender name="FILE_HEATING" class="ch.qos.logback.core.rolling.RollingFileAppender">
+		<file>heating.log</file>
+		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+			<fileNamePattern>heating.%d{yyyy-MM-dd}.log</fileNamePattern>
+			<maxHistory>30</maxHistory>
+			<totalSizeCap>1GB</totalSizeCap>
+		</rollingPolicy>
+		<encoder>
+			<pattern>%d{"yyyy-MM-dd'T'HH:mm:ss,SSS"} %d [%thread] %-5level %logger{35} - %msg%n</pattern>
+		</encoder>
+	</appender>
+
 	<appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
 		<encoder>
 			<pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
@@ -67,6 +79,10 @@
 
 	<logger name="ebusd" level="debug" additivity="false">
 		<appender-ref ref="FILE_EBUSD"/>
+	</logger>
+
+	<logger name="heating" level="debug" additivity="false">
+		<appender-ref ref="FILE_HEATING"/>
 	</logger>
 
 </configuration>
