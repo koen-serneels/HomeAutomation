@@ -4,7 +4,6 @@ import static be.error.rpi.config.RunConfig.getInstance;
 import static be.error.rpi.config.RunConfig.initialize;
 import static be.error.rpi.knx.Support.createGroupAddress;
 import static be.error.types.LocationId.BADKAMER;
-import static be.error.types.LocationId.DRESSING;
 import static be.error.types.LocationId.SK1;
 import static be.error.types.LocationId.SK2;
 import static be.error.types.LocationId.SK3;
@@ -79,7 +78,9 @@ public class StartRpiEv {
 					HeatingController heatingController = new HeatingController();
 					heatingController.start();
 
-					new RoomTemperatureCollector(BADKAMER, heatingController, createGroupAddress("10/0/4"), createGroupAddress("13/0/0")).start();
+					//Badkamer and dressing as one
+					new RoomTemperatureCollector(BADKAMER, heatingController, createGroupAddress("10/0/4"), createGroupAddress("13/0/0"), createGroupAddress("13/1/0"))
+							.start();
 					//new RoomTemperatureCollector(DRESSING, heatingController, createGroupAddress(""), createGroupAddress("13/1/0")).start();
 					new RoomTemperatureCollector(SK1, heatingController, createGroupAddress("10/0/0"), createGroupAddress("13/2/0")).start();
 					new RoomTemperatureCollector(SK2, heatingController, createGroupAddress("10/0/1"), createGroupAddress("13/3/0")).start();

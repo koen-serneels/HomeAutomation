@@ -1,6 +1,8 @@
 package be.error.rpi.heating;
 
 import static be.error.rpi.config.RunConfig.getInstance;
+import static java.util.Optional.empty;
+import static java.util.Optional.of;
 import static org.apache.commons.lang3.time.DateUtils.addSeconds;
 import static org.quartz.JobBuilder.newJob;
 import static org.quartz.SimpleScheduleBuilder.simpleSchedule;
@@ -17,13 +19,10 @@ import java.util.concurrent.LinkedBlockingDeque;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import tuwien.auto.calimero.GroupAddress;
-
 import be.error.rpi.ebus.EbusdTcpCommunicatorImpl;
 import be.error.rpi.ebus.commands.SetCurrentRoomTemperature;
 import be.error.rpi.ebus.commands.SetDesiredRoomTemperature;
 import be.error.rpi.heating.jobs.HeatingCircuitStatusJob;
-import be.error.types.LocationId;
 
 /**
  * Calculates for each room if heating is required. Heating is required when the delta between desired and actual temperature for that room exceeds a pre defined
@@ -46,6 +45,8 @@ public class HeatingController extends Thread {
 
 	private ControlValueCalculator controlValueCalculator = new ControlValueCalculator();
 
+	private Optional<RoomTemperature> lastSendRoomTemperature = empty();
+
 	@Override
 	public void run() {
 		while (true) {
@@ -63,6 +64,20 @@ public class HeatingController extends Thread {
 
 		updateList(roomTemperature);
 		RoomTemperature sorted = new RoomTemperatureDeltaSorter().sortRoomTemperatureInfos(roomTemperatureList).get(0);
+		RoomTemperature previous = lastSendRoomTemperature.orElse(sorted);
+
+		//Whenever we switch room, the heating controller needs to be 'reset' to reflect the current heating demand of that room
+		if (previous.getRoomId() != sorted.getRoomId()) {
+			logger.debug("Sending RESET desired temp " + sorted.getDesiredTemp().toString() + " to ebusd for room " + sorted.getRoomId());
+			new EbusdTcpCommunicatorImpl().send(new SetDesiredRoomTemperature(sorted.getDesiredTemp()));
+
+			BigDecimal resetControlTemp = controlValueCalculator.getResetControlValue(sorted.getHeatingDemand(), sorted.getDesiredTemp());
+			logger.debug(
+					"Sending RESET current temp " + sorted.getCurrentTemp().toString() + " (control temp:" + resetControlTemp.toString() + ") to ebusd for room " +
+							sorted
+							.getRoomId());
+			new EbusdTcpCommunicatorImpl().send(new SetCurrentRoomTemperature(resetControlTemp, sorted.getCurrentTemp()));
+		}
 
 		BigDecimal currentTemp = sorted.getCurrentTemp();
 		BigDecimal desiredTemp = sorted.getDesiredTemp();
@@ -70,8 +85,12 @@ public class HeatingController extends Thread {
 		logger.debug("Sending desired temp " + desiredTemp.toString() + " to ebusd for room " + sorted.getRoomId());
 		new EbusdTcpCommunicatorImpl().send(new SetDesiredRoomTemperature(desiredTemp));
 
-		logger.debug("Sending current temp " + currentTemp.toString() + " to ebusd for room " + sorted.getRoomId());
-		new EbusdTcpCommunicatorImpl().send(new SetCurrentRoomTemperature(controlValueCalculator.getControlValue(currentTemp, desiredTemp), currentTemp));
+		BigDecimal controlTemp = controlValueCalculator.getControlValue(currentTemp, desiredTemp);
+		logger.debug("Sending current temp " + currentTemp.toString() + "(control temp:" + controlTemp.toString() + " to ebusd for room " + sorted.getRoomId());
+		new EbusdTcpCommunicatorImpl().send(new SetCurrentRoomTemperature(controlTemp, currentTemp));
+
+		lastSendRoomTemperature = of(sorted);
+
 		logger.debug("Scheduling job for obtaining HC status");
 		getInstance().getScheduler().scheduleJob(newJob(HeatingCircuitStatusJob.class).build(),
 				newTrigger().startAt(addSeconds(new Date(), 30)).withSchedule(simpleSchedule().withRepeatCount(0)).build());

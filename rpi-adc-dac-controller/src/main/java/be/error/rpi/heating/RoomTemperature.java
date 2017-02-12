@@ -1,14 +1,11 @@
 package be.error.rpi.heating;
 
 import static java.math.BigDecimal.ROUND_FLOOR;
-import static java.util.Optional.empty;
-import static java.util.Optional.of;
 import static org.apache.commons.lang3.builder.ToStringBuilder.reflectionToString;
 import static org.apache.commons.lang3.builder.ToStringStyle.SHORT_PREFIX_STYLE;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
-import java.util.Optional;
 
 import org.apache.commons.lang3.SerializationUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
@@ -37,6 +34,7 @@ public class RoomTemperature implements Serializable {
 	public void update(RoomTemperature roomTemperature) {
 		this.currentTemp = roomTemperature.getCurrentTemp();
 		this.desiredTemp = roomTemperature.getDesiredTemp();
+		this.heatingDemand = roomTemperature.heatingDemand;
 	}
 
 	public void updateCurrentTemp(Double currentTemp) {

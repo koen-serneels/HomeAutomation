@@ -21,6 +21,14 @@ public class ControlValueCalculator {
 		return currentTemp;
 	}
 
+	public BigDecimal getResetControlValue(boolean heatingDemand, BigDecimal desiredTemp) {
+		if (heatingDemand) {
+			return desiredTemp.subtract(delta_trigger);
+		} else {
+			return desiredTemp;
+		}
+	}
+
 	public RoomTemperature updateHeatingDemand(RoomTemperature roomTemperature) {
 		BigDecimal currentTemp = roomTemperature.getCurrentTemp();
 		BigDecimal desiredTemp = roomTemperature.getDesiredTemp();
