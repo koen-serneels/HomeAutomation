@@ -25,7 +25,7 @@ public class ControlValueCalculator {
 		if (heatingDemand) {
 			return desiredTemp.subtract(delta_trigger);
 		} else {
-			return desiredTemp;
+			return desiredTemp.add(delta_trigger);
 		}
 	}
 
