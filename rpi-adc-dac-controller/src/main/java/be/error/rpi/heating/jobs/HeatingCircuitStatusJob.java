@@ -11,12 +11,12 @@ import org.slf4j.LoggerFactory;
 import tuwien.auto.calimero.GroupAddress;
 
 import be.error.rpi.ebus.EbusdTcpCommunicatorImpl;
-import be.error.rpi.ebus.commands.HeatingCircuitStatus;
+import be.error.rpi.ebus.commands.GetHeatingCircuitHeatingDemand;
 import be.error.rpi.knx.Support;
 
 public class HeatingCircuitStatusJob implements Job {
 
-	private static final Logger logger = LoggerFactory.getLogger(OutsideTemperatureJob.class);
+	private static final Logger logger = LoggerFactory.getLogger(HeatingCircuitStatusJob.class);
 
 	private GroupAddress heatingCircuitStatusGa = Support.createGroupAddress("10/3/0");
 
@@ -24,12 +24,12 @@ public class HeatingCircuitStatusJob implements Job {
 	public void execute(final JobExecutionContext context) throws JobExecutionException {
 		try {
 			logger.debug("Requesting heating circuit status");
-			HeatingCircuitStatus heatingCircuitStatus = new HeatingCircuitStatus();
-			boolean result = heatingCircuitStatus.convertResult(new EbusdTcpCommunicatorImpl().send(heatingCircuitStatus));
+			GetHeatingCircuitHeatingDemand getHeatingCircuitHeatingDemand = new GetHeatingCircuitHeatingDemand();
+			boolean result = getHeatingCircuitHeatingDemand.convertResult(new EbusdTcpCommunicatorImpl().send(getHeatingCircuitHeatingDemand));
 			logger.debug("Communicating requesting heating circuit status " + result + " " + heatingCircuitStatusGa);
 			getInstance().getKnxConnectionFactory().createProcessCommunicator().write(heatingCircuitStatusGa, result);
 		} catch (Exception e) {
-			logger.error(OutsideTemperatureJob.class.getSimpleName() + " exception", e);
+			logger.error(HeatingCircuitStatusJob.class.getSimpleName() + " exception", e);
 			throw new JobExecutionException(e);
 		}
 	}

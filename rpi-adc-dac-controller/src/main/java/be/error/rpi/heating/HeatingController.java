@@ -1,8 +1,13 @@
 package be.error.rpi.heating;
 
 import static be.error.rpi.config.RunConfig.getInstance;
+import static be.error.rpi.knx.UdpChannelCommand.HEATING_ENABLED;
+import static java.util.Arrays.asList;
+import static java.util.Comparator.comparing;
 import static java.util.Optional.empty;
 import static java.util.Optional.of;
+import static java.util.stream.Collectors.toList;
+import static org.apache.commons.collections4.CollectionUtils.extractSingleton;
 import static org.apache.commons.lang3.time.DateUtils.addSeconds;
 import static org.quartz.JobBuilder.newJob;
 import static org.quartz.SimpleScheduleBuilder.simpleSchedule;
@@ -19,10 +24,17 @@ import java.util.concurrent.LinkedBlockingDeque;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import tuwien.auto.calimero.GroupAddress;
+
 import be.error.rpi.ebus.EbusdTcpCommunicatorImpl;
 import be.error.rpi.ebus.commands.SetCurrentRoomTemperature;
 import be.error.rpi.ebus.commands.SetDesiredRoomTemperature;
+import be.error.rpi.ebus.commands.SetHeatCircruitEnabled;
+import be.error.rpi.heating.jobs.HeatingCircuitEnabledJob;
 import be.error.rpi.heating.jobs.HeatingCircuitStatusJob;
+import be.error.rpi.knx.UdpChannel.UdpChannelCallback;
+import be.error.rpi.knx.UdpChannelCommand;
+import be.error.types.LocationId;
 
 /**
  * Calculates for each room if heating is required. Heating is required when the delta between desired and actual temperature for that room exceeds a pre defined
@@ -41,16 +53,50 @@ public class HeatingController extends Thread {
 
 	private final BlockingQueue<RoomTemperature> commandQueue = new LinkedBlockingDeque();
 
-	private List<RoomTemperature> roomTemperatureList = new ArrayList<>();
-
-	private ControlValueCalculator controlValueCalculator = new ControlValueCalculator();
-
+	private final List<RoomTemperature> roomTemperatureList = new ArrayList<>();
+	private final ControlValueCalculator controlValueCalculator = new ControlValueCalculator();
 	private Optional<RoomTemperature> lastSendRoomTemperature = empty();
+
+	private final List<RoomValveController> roomValveControllers = new ArrayList<>();
+
+	private Optional<Boolean> heatingEnabled = empty();
+	private Optional<Boolean> lastSendHeatingEnabled = empty();
+	private boolean heatingEnabledBecauseOfFrostProtection;
 
 	@Override
 	public void run() {
+		getInstance().addUdpChannelCallback(new UdpChannelCallback() {
+			@Override
+			public UdpChannelCommand command() {
+				return HEATING_ENABLED;
+			}
+
+			@Override
+			public void callBack(final String enabled) throws Exception {
+				logger.debug("Heating enabled status callback received:" + enabled + " [heatingEnabledBecauseOfFrostProtection=" + heatingEnabledBecauseOfFrostProtection
+						+ "]");
+				if (enabled.equals("1")) {
+					logger.debug("Setting heating enabled status to true");
+					heatingEnabledBecauseOfFrostProtection = false;
+					enableOrDisableHeatingIfNeeded(true);
+				} else {
+					if (!heatingEnabledBecauseOfFrostProtection) {
+						logger.debug("Setting heating enabled status to false");
+						enableOrDisableHeatingIfNeeded(false);
+					} else {
+						logger.debug("Not changing heating enabled status (" + heatingEnabled.get() + ") as heatingEnabledBecauseOfFrostProtection is " + "true");
+					}
+				}
+			}
+		});
+
 		while (true) {
 			try {
+				if (!heatingEnabled.isPresent()) {
+					logger.debug("Heating enabled status not yet received. Waiting 20 seconds. Heating controll is offline during this time");
+					sleep(20000);
+					continue;
+				}
 				control();
 			} catch (Exception e) {
 				logger.error(HeatingController.class.getName() + " had exception while processing. Restarting.", e);
@@ -61,11 +107,49 @@ public class HeatingController extends Thread {
 	private void control() throws Exception {
 		RoomTemperature roomTemperature = commandQueue.take();
 		logger.debug("Heating controller processing temperature from room " + roomTemperature.getRoomId() + " Details:" + roomTemperature);
+		logger.debug("Heating enabled: " + heatingEnabled.get());
 
 		updateList(roomTemperature);
 		RoomTemperature sorted = new RoomTemperatureDeltaSorter().sortRoomTemperatureInfos(roomTemperatureList).get(0);
 		RoomTemperature previous = lastSendRoomTemperature.orElse(sorted);
+		logger.debug("Sorted: " + sorted + " Last send:" + (lastSendRoomTemperature.isPresent() ? lastSendRoomTemperature.get() : null) + " Previous:" + previous);
 
+		process(sorted, previous);
+		logger.debug("Check if valve update need " + roomTemperature.getRoomId());
+		updateValveIfNeeded(roomTemperature);
+
+		/**
+		 * If heating is disabled, it is expected that the room controllers go into frost protection mode. Ie. they will continue sending the current temperature, but
+		 * the desired temperature will be a low temperature (eg. 10°C). If one of the rooms would get colder than this temperature, we enable heating again. From the
+		 * moment minimum temperature is reached, heating is turned off again (unless it was re-enabled in the meantime)
+		 */
+		if (!heatingEnabled.get()) {
+			RoomTemperature coldest = roomTemperatureList.stream().sorted(comparing(RoomTemperature::getCurrentTemp)).findFirst().get();
+			if (coldest.getHeatingDemand()) {
+				enableOrDisableHeatingIfNeeded(true);
+				heatingEnabledBecauseOfFrostProtection = true;
+			} else {
+				enableOrDisableHeatingIfNeeded(false);
+				heatingEnabledBecauseOfFrostProtection = false;
+			}
+		}
+	}
+
+	private void enableOrDisableHeatingIfNeeded(boolean enabled) throws Exception {
+		if (!lastSendHeatingEnabled.isPresent() || lastSendHeatingEnabled.get() != enabled) {
+			logger.debug("Setting heating circuit enabled status to " + enabled);
+			new EbusdTcpCommunicatorImpl().send(new SetHeatCircruitEnabled(enabled));
+			lastSendHeatingEnabled = of(enabled);
+		} else {
+			logger.debug("Not sending heating circuit enabled status. lastSendHeatingEnabled=" + lastSendHeatingEnabled.orElseGet(null) + " value:" + enabled);
+		}
+		logger.debug("Scheduling job for obtaining heating circuit enabled status");
+		getInstance().getScheduler().scheduleJob(newJob(HeatingCircuitEnabledJob.class).build(),
+				newTrigger().startAt(addSeconds(new Date(), 30)).withSchedule(simpleSchedule().withRepeatCount(0)).build());
+		heatingEnabled = of(enabled);
+	}
+
+	private void process(RoomTemperature sorted, RoomTemperature previous) throws Exception {
 		//Whenever we switch room, the heating controller needs to be 'reset' to reflect the current heating demand of that room
 		if (previous.getRoomId() != sorted.getRoomId()) {
 			logger.debug("Sending RESET desired temp " + sorted.getDesiredTemp().toString() + " to ebusd for room " + sorted.getRoomId());
@@ -73,8 +157,7 @@ public class HeatingController extends Thread {
 
 			BigDecimal resetControlTemp = controlValueCalculator.getResetControlValue(sorted.getHeatingDemand(), sorted.getDesiredTemp());
 			logger.debug(
-					"Sending RESET current temp " + sorted.getCurrentTemp().toString() + " (control temp:" + resetControlTemp.toString() + ") to ebusd for room " +
-							sorted
+					"Sending RESET current temp " + sorted.getCurrentTemp().toString() + " (control temp:" + resetControlTemp.toString() + ") to ebusd for room " + sorted
 							.getRoomId());
 			new EbusdTcpCommunicatorImpl().send(new SetCurrentRoomTemperature(resetControlTemp, sorted.getCurrentTemp()));
 		}
@@ -96,6 +179,18 @@ public class HeatingController extends Thread {
 				newTrigger().startAt(addSeconds(new Date(), 30)).withSchedule(simpleSchedule().withRepeatCount(0)).build());
 	}
 
+	private void updateValveIfNeeded(RoomTemperature roomTemperature) {
+		RoomValveController roomValveController = extractSingleton(
+				roomValveControllers.stream().filter(r -> r.getLocationId() == roomTemperature.getRoomId()).collect(toList()));
+		roomValveController.updateIfNeeded(roomTemperature.getHeatingDemand());
+	}
+
+	public HeatingController registerRoom(LocationId locationId, GroupAddress currentTemperatureGa, GroupAddress... valves) {
+		roomValveControllers.add(new RoomValveController(locationId, asList(valves)));
+		new RoomTemperatureCollector(locationId, this, currentTemperatureGa).start();
+		return this;
+	}
+
 	private void updateList(RoomTemperature roomTemperature) {
 		Optional<RoomTemperature> optional = this.roomTemperatureList.stream().filter(k -> k.getRoomId() == roomTemperature.getRoomId()).findFirst();
 
@@ -106,7 +201,7 @@ public class HeatingController extends Thread {
 		}
 	}
 
-	public void send(RoomTemperature roomTemperature) {
+	void send(RoomTemperature roomTemperature) {
 		try {
 			commandQueue.put(roomTemperature);
 		} catch (Exception e) {
