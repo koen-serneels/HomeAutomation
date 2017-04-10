@@ -9,6 +9,7 @@ import be.error.rpi.dac.dimmer.config.DimmerConfig;
 /**
  * @author Koen Serneels
  */
+
 public class DimmerBadkamer implements DimmerConfig {
 
 	@Override
@@ -18,15 +19,16 @@ public class DimmerBadkamer implements DimmerConfig {
 				name(BADKAMER);
 				ic2BoardAddress(0x5B);
 				boardChannel(3);
+
 				outputGroupAddressesForVisualisationStatusFeedback("15/0/2");
 				outputGroupAddressesForActorSwitchingOnAndOff("4/4/1");
-
-				outputGroupAddressesForSwitchLedControl("4/4/7");
 				outputGroupAddressesSwitchUpdate("4/4/10");
-				inputGroupAddressForOnAndOff("4/4/8");
-				inputGroupAddressForDimStartAndStop("4/4/9");
 
+				//inputGroupAddressForOnAndOff("4/4/8");
+				inputGroupAddressForOnOffOverride("4/4/8", "4/4/11");
+				inputGroupAddressForDimStartAndStop("4/4/9");
 				inputGroupAddressForAbsoluteDimValue("14/0/2");
+				inputGroupAddressForAbsoluteDimValueOverride("14/0/16");
 			}
 		}.build();
 	}

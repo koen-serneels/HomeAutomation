@@ -28,14 +28,18 @@ public class KnxDimmerProcessListener extends AbstractDimmerProcessListener {
 	private final Optional<GroupAddress> onOffOverride;
 	private final Optional<GroupAddress> dim;
 	private final Optional<GroupAddress> dimAbsolute;
+	private final Optional<GroupAddress> dimAbsoluteOverride;
+
 	private int minDimVal = 1;
 
 	KnxDimmerProcessListener(final GroupAddress onOff, final Optional<GroupAddress> onOffOverride, final Optional<GroupAddress> precenseDetectorLock,
-			final Optional<GroupAddress> dim, final Optional<GroupAddress> dimAbsolute, final Optional<Integer> minDimVal, Dimmer dimmer) {
+			final Optional<GroupAddress> dim, final Optional<GroupAddress> dimAbsolute, final Optional<GroupAddress> dimAbsoluteOverride,
+			final Optional<Integer> minDimVal, Dimmer dimmer) {
 		this.onOff = onOff;
 		this.dim = dim;
 		this.dimAbsolute = dimAbsolute;
 		this.onOffOverride = onOffOverride;
+		this.dimAbsoluteOverride = dimAbsoluteOverride;
 		this.precenseDetectorLock = precenseDetectorLock;
 		if (minDimVal.isPresent()) {
 			this.minDimVal = minDimVal.get();
@@ -68,9 +72,18 @@ public class KnxDimmerProcessListener extends AbstractDimmerProcessListener {
 				dimmer.interrupt();
 				int i = asUnsigned(e, SCALING);
 				DimmerCommand dimmerCommand = new DimmerCommand(new BigDecimal(i), e.getSourceAddr());
-				if (onOffOverride.isPresent()) {
+				dimmer.putCommand(dimmerCommand);
+			}
+
+			if (dimAbsoluteOverride.isPresent() && e.getDestination().equals(dimAbsoluteOverride.get())) {
+				dimmer.interrupt();
+				int i = asUnsigned(e, SCALING);
+				DimmerCommand dimmerCommand = new DimmerCommand(new BigDecimal(i), e.getSourceAddr());
+				if (i > 0) {
 					pc.write(precenseDetectorLock.get(), true);
 					dimmerCommand.setOverride();
+				} else {
+					pc.write(precenseDetectorLock.get(), false);
 				}
 				dimmer.putCommand(dimmerCommand);
 			}

@@ -40,6 +40,7 @@ public class DimmerBuilder {
 	private Optional<GroupAddress> onOffOverride = empty();
 	private Optional<GroupAddress> dim = empty();
 	private Optional<GroupAddress> dimAbsolute = empty();
+	private Optional<GroupAddress> dimAbsoluteOverride = empty();
 
 	//GA's that are written to (~output)
 	private List<GroupAddress> switchGroupAddresses = new ArrayList();
@@ -156,6 +157,14 @@ public class DimmerBuilder {
 	}
 
 	/**
+	 * Will listen for telegrams on the given GA which are considered percentage telegrams for bringing the dimmer to the desired value
+	 */
+	public DimmerBuilder inputGroupAddressForAbsoluteDimValueOverride(String dim) {
+		this.dimAbsoluteOverride = of(createGroupAddress(dim));
+		return this;
+	}
+
+	/**
 	 * The dimming will not go below this value. This is important as certain LED drivers turn themselves off if the analog 0-10v input goes lower than a specific
 	 * voltage. By setting the min dim value the LED cannot be 'dimmed to off'. This increases user experience as the LED can now not be accidentally turned off when
 	 * the user wants to dim to minimum. In other words, if dimming stops, the user knows the LED is at it's minimum.
@@ -192,8 +201,8 @@ public class DimmerBuilder {
 
 			dimmer.start();
 
-			KnxDimmerProcessListener knxDimmerProcessListener = new KnxDimmerProcessListener(onOff, onOffOverride, precenseDetectorLock, dim, dimAbsolute, minDimVal,
-					dimmer);
+			KnxDimmerProcessListener knxDimmerProcessListener = new KnxDimmerProcessListener(onOff, onOffOverride, precenseDetectorLock, dim, dimAbsolute,
+					dimAbsoluteOverride, minDimVal, dimmer);
 			getInstance().getKnxConnectionFactory().createProcessCommunicator(knxDimmerProcessListener);
 			dimmer.setKnxDimmerProcessListener(knxDimmerProcessListener);
 			return dimmer;
