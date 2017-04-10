@@ -123,7 +123,7 @@ public class HeatingController extends Thread {
 		 * the desired temperature will be a low temperature (eg. 10°C). If one of the rooms would get colder than this temperature, we enable heating again. From the
 		 * moment minimum temperature is reached, heating is turned off again (unless it was re-enabled in the meantime)
 		 */
-		if (!heatingEnabled.get()) {
+		if (!heatingEnabled.get() || heatingEnabledBecauseOfFrostProtection) {
 			RoomTemperature coldest = roomTemperatureList.stream().sorted(comparing(RoomTemperature::getCurrentTemp)).findFirst().get();
 			if (coldest.getHeatingDemand()) {
 				enableOrDisableHeatingIfNeeded(true);
