@@ -22,11 +22,6 @@ public class VentilationUdpCallback implements UdpChannelCallback {
 	private int channel = 1;
 
 	@Override
-	public boolean isApplicable(final UdpChannelCommand udpChannelCommand) {
-		return udpChannelCommand == VENTILATIE;
-	}
-
-	@Override
 	public UdpChannelCommand command() {
 		return VENTILATIE;
 	}

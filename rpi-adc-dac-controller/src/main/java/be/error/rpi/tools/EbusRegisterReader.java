@@ -1,35 +1,62 @@
 package be.error.rpi.tools;
 
-import static org.apache.commons.lang3.StringUtils.leftPad;
-
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
+import java.io.FileInputStream;
+import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.math.BigInteger;
 import java.net.Socket;
-import java.util.ArrayList;
-import java.util.List;
+import java.nio.charset.Charset;
 
 public class EbusRegisterReader {
 
 	public static void main(String[] args) throws Exception {
-		String template = "15b5090329%s00";
+		InputStream fis = new FileInputStream("/home/koen/devel/projects/HomeAutomation/commands-ev");
+		InputStreamReader isr = new InputStreamReader(fis, Charset.forName("UTF-8"));
+		BufferedReader br = new BufferedReader(isr);
 
 		try (Socket clientSocket = new Socket("192.168.0.10", 8888)) {
-			List<String> results = new ArrayList<>();
 			DataOutputStream out = new DataOutputStream(clientSocket.getOutputStream());
 			BufferedReader in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
 
-			for (int i = 0; i < 255; i++) {
-				String cmd = String.format(template, leftPad(new BigInteger("" + i).toString(16), 2, "0"));
-				out.writeBytes("hex " + cmd + "\n");
+			String s = null;
+			while ((s = br.readLine()) != null) {
+				out.writeBytes(s + "\n");
 				String result = in.readLine();
-				System.err.println(cmd + " - " + result);
+				System.err.println(s + " - " + result);
 				in.readLine();
 			}
-			out.close();
-			in.close();
 		}
 	}
+/*
+	//String template = "15b5090329%s00";
+	String template = "  15b509030d%s%s";
+
+	InputStream fis = new FileInputStream("/home/koen/devel/projects/HomeAutomation/commands");
+	InputStreamReader isr = new InputStreamReader(fis, Charset.forName("UTF-8"));
+	BufferedReader br = new BufferedReader(isr);
+
+		try (Socket clientSocket = new Socket("192.168.0.10", 8888)) {
+		DataOutputStream out = new DataOutputStream(clientSocket.getOutputStream());
+		BufferedReader in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
+
+		for (int x = 0; x <= 1; x++) {
+			for (int i = 0; i < 255; i++) {
+				String cmd = String.format(template, leftPad(new BigInteger("" + i).toString(16), 2, "0"), leftPad(new BigInteger("" + x).toString(16), 2, "0"));
+				//String c = "hex -s " + EbusDeviceAddress.GROUND_FLOOR.getEbusAddressPrefix() + " " + cmd + "\n";
+				out.writeBytes(br.readLine());
+				String result = in.readLine();
+				System.err.println(cmd + " - " + result);
+				if (!result.contains("ERR")) {
+						fileWriter.write(c);
+						fileWriter.flush();
+					}
+				in.readLine();
+			}
+		}
+		out.close();
+		in.close();
+	}
+*/
 }
 

@@ -13,11 +13,15 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/**
- * Created by koen on 04.01.17.
- */
+import be.error.rpi.heating.EbusDeviceAddress;
+
 public class EbusdTcpCommunicatorImpl implements EbusdTcpCommunicator {
 	private static final Logger logger = LoggerFactory.getLogger("ebusd");
+	private final EbusDeviceAddress ebusDeviceAddress;
+
+	public EbusdTcpCommunicatorImpl(final EbusDeviceAddress ebusDeviceAddress) {
+		this.ebusDeviceAddress = ebusDeviceAddress;
+	}
 
 	public List<String> send(EbusCommand ebusCommand) throws Exception {
 		try (Socket clientSocket = new Socket(getInstance().getEbusdIp(), getInstance().getEbusdPort())) {
@@ -26,8 +30,9 @@ public class EbusdTcpCommunicatorImpl implements EbusdTcpCommunicator {
 			BufferedReader in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
 
 			for (String command : ebusCommand.getEbusCommands()) {
-				logger.debug("Writing to ebus: hex " + command);
-				out.writeBytes("hex " + command + "\n");
+				String toSend = "hex -s " + ebusDeviceAddress.getEbusAddressPrefix() + " " + command;
+				logger.debug("Writing to ebus: " + toSend);
+				out.writeBytes(toSend + "\n");
 				String result = in.readLine();
 				logger.debug("  Result:" + result);
 				if (!ebusCommand.withResult() && !result.equals("00")) {

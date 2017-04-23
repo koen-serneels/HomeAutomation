@@ -1,0 +1,33 @@
+package be.error.rpi.tools;
+
+import java.math.BigDecimal;
+
+public class NumberUtils {
+
+	/**
+	 * Convert number object to BigDecimal
+	 *
+	 * @param obj Any kind of primitive datatype
+	 * @return A converted BigDecimal
+	 */
+	public static BigDecimal toBigDecimal(Object obj) {
+
+		if (obj instanceof Integer) {
+			return BigDecimal.valueOf((Integer) obj);
+		} else if (obj instanceof Long) {
+			return BigDecimal.valueOf((Long) obj);
+		} else if (obj instanceof Short) {
+			return BigDecimal.valueOf((Short) obj);
+		} else if (obj instanceof Byte) {
+			return BigDecimal.valueOf((Byte) obj);
+		} else if (obj instanceof Double) {
+			return BigDecimal.valueOf((Double) obj);
+		} else if (obj instanceof Float) {
+			return BigDecimal.valueOf((Float) obj);
+		} else if (obj instanceof BigDecimal) {
+			return (BigDecimal) obj;
+		}
+
+		return null;
+	}
+}

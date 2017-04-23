@@ -2,11 +2,7 @@ package be.error.rpi.heating;
 
 import static be.error.rpi.config.RunConfig.getInstance;
 import static be.error.rpi.knx.UdpChannelCommand.Constants.TEMPERATURE;
-import static java.util.Arrays.asList;
-import static java.util.Optional.empty;
-import static java.util.Optional.of;
-
-import java.util.Optional;
+import static be.error.rpi.knx.UdpChannelCommand.fromString;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,18 +28,13 @@ public class RoomTemperatureCollector {
 
 	private final ControlValueCalculator controlValueCalculator = new ControlValueCalculator();
 
-	private final RoomValveController roomValveController;
-
 	private final RoomTemperature roomTemperature;
 
-	private Optional<RoomTemperature> lastSendRoomTemperature = empty();
-
-	public RoomTemperatureCollector(final LocationId roomId, final HeatingController heatingController, GroupAddress currentTemperatureGa, GroupAddress... valves) {
+	public RoomTemperatureCollector(final LocationId roomId, final HeatingController heatingController, GroupAddress currentTemperatureGa) {
 		this.roomId = roomId;
 		this.heatingController = heatingController;
 		this.currentTemperatureGa = currentTemperatureGa;
-		this.desiredTempCommand = UdpChannelCommand.fromString(TEMPERATURE + "_" + roomId);
-		this.roomValveController = new RoomValveController(roomId, asList(valves));
+		this.desiredTempCommand = fromString(TEMPERATURE + "_" + roomId);
 		this.roomTemperature = new RoomTemperature(roomId);
 	}
 
@@ -52,11 +43,6 @@ public class RoomTemperatureCollector {
 			@Override
 			public UdpChannelCommand command() {
 				return desiredTempCommand;
-			}
-
-			@Override
-			public boolean isApplicable(final UdpChannelCommand udpChannelCommand) {
-				return udpChannelCommand == desiredTempCommand;
 			}
 
 			@Override
@@ -113,19 +99,8 @@ public class RoomTemperatureCollector {
 		controlValueCalculator.updateHeatingDemand(roomTemperature);
 		logger.debug("Updated heating demand for room " + roomTemperature.getRoomId() + " new value:" + roomTemperature.getHeatingDemand());
 
-		sendRoomTemperatureUpdateIfNeeded();
-		roomValveController.updateIfNeeded(roomTemperature.getHeatingDemand());
-	}
-
-	private void sendRoomTemperatureUpdateIfNeeded() {
-		if (lastSendRoomTemperature.isPresent() && lastSendRoomTemperature.get().equals(roomTemperature)) {
-			logger.debug("Not sending room temp info. Last send:" + lastSendRoomTemperature.get() + " current:" + roomTemperature);
-			return;
-		}
-
 		RoomTemperature toSend = roomTemperature.clone();
-		logger.debug("Sending room temp info. Last send:" + lastSendRoomTemperature + " current:" + toSend);
+		logger.debug("Sending room temp info: " + toSend);
 		heatingController.send(toSend);
-		lastSendRoomTemperature = of(toSend);
 	}
 }

@@ -43,7 +43,7 @@ public class UdpChannel extends Thread {
 				String[] split = StringUtils.split(s, "|");
 				UdpChannelCommand udpChannelCommand = fromString(split[0]);
 				synchronized (udpChannelCallbacks) {
-					this.udpChannelCallbacks.stream().filter(cb -> cb.isApplicable(udpChannelCommand)).forEach(cb -> {
+					this.udpChannelCallbacks.stream().filter(cb -> cb.command() == udpChannelCommand).forEach(cb -> {
 						try {
 							cb.callBack(StringUtils.join(remove(split, 0)));
 						} catch (Exception e) {
@@ -68,8 +68,6 @@ public class UdpChannel extends Thread {
 	public interface UdpChannelCallback {
 
 		UdpChannelCommand command();
-
-		boolean isApplicable(UdpChannelCommand udpChannelCommand);
 
 		void callBack(String s) throws Exception;
 	}

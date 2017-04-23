@@ -66,6 +66,7 @@ public class RunConfig {
 
 		try {
 			scheduler = StdSchedulerFactory.getDefaultScheduler();
+			scheduler.start();
 		} catch (SchedulerException e) {
 			throw new RuntimeException(e);
 		}

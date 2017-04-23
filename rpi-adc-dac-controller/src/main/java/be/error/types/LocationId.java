@@ -5,6 +5,7 @@ package be.error.types;
  */
 public enum LocationId {
 
+	GELIJKVLOERS("Gelijkvloers"),
 	NACHTHAL("Nachthal"),
 	BADKAMER("Badkamer"),
 	DRESSING("Dressing"),

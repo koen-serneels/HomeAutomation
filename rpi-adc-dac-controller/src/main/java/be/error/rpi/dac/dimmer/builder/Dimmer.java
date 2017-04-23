@@ -24,8 +24,8 @@ import tuwien.auto.calimero.GroupAddress;
 import tuwien.auto.calimero.dptxlator.DPTXlator8BitUnsigned;
 import tuwien.auto.calimero.process.ProcessCommunicator;
 
-import be.error.types.LocationId;
 import be.error.rpi.dac.support.Support;
+import be.error.types.LocationId;
 
 /**
  * @author Koen Serneels
@@ -112,6 +112,8 @@ public class Dimmer extends Thread {
 					lastDimDirection = UP;
 				} else if (dimmerCommand.getTargetVal().compareTo(curVal) < 0) {
 					lastDimDirection = DOWN;
+				} else {
+					lastDimDirection = (lastDimDirection == UP ? DOWN : UP);
 				}
 
 				while (curVal.compareTo(dimmerCommand.getTargetVal()) != 0) {

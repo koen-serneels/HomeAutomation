@@ -2,14 +2,17 @@ package be.error.rpi;
 
 import static be.error.rpi.config.RunConfig.getInstance;
 import static be.error.rpi.config.RunConfig.initialize;
-import static org.quartz.CronScheduleBuilder.cronSchedule;
-import static org.quartz.JobBuilder.newJob;
-import static org.quartz.TriggerBuilder.newTrigger;
+import static be.error.rpi.heating.EbusDeviceAddress.GROUND_FLOOR;
+import static be.error.rpi.knx.Support.createGroupAddress;
+import static be.error.types.LocationId.GELIJKVLOERS;
 
-import org.quartz.CronExpression;
-import org.quartz.Scheduler;
+import java.util.HashMap;
+import java.util.Map;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import tuwien.auto.calimero.GroupAddress;
 
 import be.error.rpi.adc.AdcController;
 import be.error.rpi.dac.dimmer.builder.Dimmer;
@@ -24,7 +27,13 @@ import be.error.rpi.dac.dimmer.config.dimmers.gv.DimmerWc;
 import be.error.rpi.dac.dimmer.config.dimmers.gv.DimmerZitHoek;
 import be.error.rpi.dac.dimmer.config.scenes.Gang;
 import be.error.rpi.dac.dimmer.config.scenes.GvComfort;
-import be.error.rpi.heating.jobs.OutsideTemperatureJob;
+import be.error.rpi.ebus.EbusCommand;
+import be.error.rpi.ebus.commands.GetDepartWaterTemperatureGv;
+import be.error.rpi.ebus.commands.GetHeatingCircuitEnabled;
+import be.error.rpi.ebus.commands.GetHeatingCircuitHeatingDemandGv;
+import be.error.rpi.ebus.commands.GetOutsideTemperature;
+import be.error.rpi.heating.HeatingController;
+import be.error.rpi.heating.HeatingInfoPollerJobSchedulerFactory;
 
 /**
  * @author Koen Serneels
@@ -38,63 +47,55 @@ public class StartRpiGv {
 	public static void main(String[] args) throws Exception {
 		initialize(RPI_LAN_IP);
 
-		new Thread() {
-			@Override
-			public void run() {
-				while (true) {
-					try {
-						AdcController adcController = new AdcController();
-						adcController.run();
-					} catch (Exception e) {
-						logger.error("AdcController got exception. Waiting 10secs before restarting.", e);
-						try {
-							Thread.sleep(10000);
-						} catch (InterruptedException e1) {
-							logger.error("AdcController got interrupted while waiting on restart", e1);
-							throw new RuntimeException(e1);
-						}
-					}
-				}
-			}
-		}.start();
+		Map<EbusCommand<?>, GroupAddress> config = new HashMap<>();
+		config.put(new GetHeatingCircuitHeatingDemandGv(), createGroupAddress("10/2/1"));
+		config.put(new GetHeatingCircuitEnabled(), createGroupAddress("10/2/2"));
+		config.put(new GetOutsideTemperature(), createGroupAddress("10/0/16"));
+		config.put(new GetDepartWaterTemperatureGv(), createGroupAddress("10/2/4"));
+		HeatingInfoPollerJobSchedulerFactory heatingInfoPollerJobSchedulerFactory = new HeatingInfoPollerJobSchedulerFactory(GROUND_FLOOR, config);
 
-		new Thread() {
-			@Override
-			public void run() {
+		new Thread(() -> {
+			while (true) {
 				try {
-					Dimmer dimmerEethoek = new DimmerEethoek().start();
-					Dimmer dimmerVoordeur = new DimmerVoordeur().start();
-					Dimmer dimmerInkomhal = new DimmerInkomhal().start();
-					Dimmer dimmerKeuken = new DimmerKeuken().start();
-					Dimmer dimmerZithoek = new DimmerZitHoek().start();
-					Dimmer dimmerGang = new DimmerGang().start();
-					Dimmer dimmerWc = new DimmerWc().start();
-					Dimmer dimmerBerging = new DimmerBerging().start();
-					Dimmer dimmerGarage = new DimmerGarage().start();
-
-					new Gang(dimmerInkomhal, dimmerGang).run();
-					new GvComfort(dimmerEethoek, dimmerZithoek, dimmerKeuken).run();
+					AdcController adcController = new AdcController();
+					adcController.run();
 				} catch (Exception e) {
-					logger.error("DacController got exception. Restarting", e);
+					logger.error("ADC CONTROLLER DID NOT START", e);
 				}
 			}
-		}.start();
+		}).start();
 
-		new Thread() {
-			@Override
-			public void run() {
-				try {
-					Scheduler scheduler = getInstance().getScheduler();
-					scheduler.scheduleJob(newJob(OutsideTemperatureJob.class).build(),
-							newTrigger().withIdentity("OutsideTemperatureJob").withSchedule(cronSchedule(new CronExpression("0 0/5 * * * ?"))).startNow().build());
-					scheduler.start();
-				} catch (Exception e) {
-					logger.error("Scheduler got exception. Restarting", e);
-				}
+		new Thread(() -> {
+			try {
+				new DimmerVoordeur().start();
+				new DimmerWc().start();
+				new DimmerBerging().start();
+				new DimmerGarage().start();
+
+				Dimmer dimmerEethoek = new DimmerEethoek().start();
+				Dimmer dimmerInkomhal = new DimmerInkomhal().start();
+				Dimmer dimmerKeuken = new DimmerKeuken().start();
+				Dimmer dimmerZithoek = new DimmerZitHoek().start();
+				Dimmer dimmerGang = new DimmerGang().start();
+
+				new Gang(dimmerInkomhal, dimmerGang).run();
+				new GvComfort(dimmerEethoek, dimmerZithoek, dimmerKeuken).run();
+			} catch (Exception e) {
+				logger.error("DAC CONTROLLER DID NOT START", e);
 			}
-		}.start();
+		}).start();
 
-		logger.debug("Started");
+		new Thread(() -> {
+			try {
+				HeatingController heatingController = new HeatingController(GROUND_FLOOR, heatingInfoPollerJobSchedulerFactory);
+				heatingController.registerRoom(GELIJKVLOERS, createGroupAddress("10/2/0"));
+				heatingController.start();
+			} catch (Exception e) {
+				logger.error("HEATING CONTROLLER DID NOT START", e);
+			}
+		}).start();
+
+		logger.debug("Done starting up threads");
 	}
 }
 

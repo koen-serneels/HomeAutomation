@@ -20,10 +20,10 @@ public class EbusSender {
 
 	public static void main(String[] args) throws Exception {
 
-		SetDesiredRoomTemperature desiredRoomTemperature = new SetDesiredRoomTemperature(new BigDecimal("23.00"));
-		SetCurrentRoomTemperature setCurrentRoomTemperature = new SetCurrentRoomTemperature(new BigDecimal("23.00"), new BigDecimal("23.00"));
-		send(desiredRoomTemperature);
-		send(setCurrentRoomTemperature);
+		//SetDesiredRoomTemperature desiredRoomTemperature = new SetDesiredRoomTemperature(new BigDecimal("23.00"));
+		//SetCurrentRoomTemperature setCurrentRoomTemperature = new SetCurrentRoomTemperature(new BigDecimal("23.00"), new BigDecimal("23.00"));
+		//send(desiredRoomTemperature);
+		//send(setCurrentRoomTemperature);
 	}
 
 	public static List<String> send(EbusCommand ebusCommand) throws Exception {

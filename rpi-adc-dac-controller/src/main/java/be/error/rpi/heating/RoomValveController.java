@@ -49,4 +49,8 @@ public class RoomValveController {
 			throw new RuntimeException(e);
 		}
 	}
+
+	LocationId getLocationId() {
+		return locationId;
+	}
 }
