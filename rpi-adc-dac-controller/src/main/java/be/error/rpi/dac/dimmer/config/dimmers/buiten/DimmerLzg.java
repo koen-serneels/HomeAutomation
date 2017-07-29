@@ -15,10 +15,11 @@ public class DimmerLzg implements DimmerConfig {
 				name(LZG);
 				ic2BoardAddress(0x5A);
 				boardChannel(1);
-				delayBeforeIncreasingDimValue(15);
+				delayBeforeIncreasingDimValue(0);
 
 				//outputGroupAddressesForVisualisationStatusFeedback("");
-				//outputGroupAddressesForActorSwitchingOnAndOff("");
+				outputGroupAddressesForActorSwitchingOnAndOff("1/0/9");
+
 				inputGroupAddressForAbsoluteDimValue("14/0/14");
 			}
 		}.build();

@@ -10,6 +10,7 @@ import org.slf4j.LoggerFactory;
 
 import tuwien.auto.calimero.CloseEvent;
 import tuwien.auto.calimero.FrameEvent;
+import tuwien.auto.calimero.link.KNXLinkClosedException;
 import tuwien.auto.calimero.link.KNXNetworkLinkIP;
 import tuwien.auto.calimero.link.NetworkLinkListener;
 import tuwien.auto.calimero.link.medium.TPSettings;
@@ -28,8 +29,23 @@ public class KnxConnectionFactory {
 	private static final Logger logger = LoggerFactory.getLogger(KnxConnectionFactory.class);
 
 	private KNXNetworkLinkIP knxNetworkLinkIP;
+	private final String knxIp;
+	private final int knxPort;
+	private final String localIp;
 
 	public KnxConnectionFactory(final String knxIp, final int knxPort, final String localIp) {
+		this.knxIp = knxIp;
+		this.knxPort = knxPort;
+		this.localIp = localIp;
+		buildLink();
+	}
+
+	private synchronized void buildLink() {
+		if (knxNetworkLinkIP != null && knxNetworkLinkIP.isOpen()) {
+			logger.error("Trying to build link, but link already open");
+			return;
+		}
+
 		try {
 			LogManager.getManager().addWriter(null, new LogWriter() {
 				@Override
@@ -83,6 +99,10 @@ public class KnxConnectionFactory {
 	}
 
 	public ProcessCommunicator createProcessCommunicator(ProcessListener... processListeners) {
+		return createProcessCommunicator(false, processListeners);
+	}
+
+	private ProcessCommunicator createProcessCommunicator(boolean retry, ProcessListener... processListeners) {
 		try {
 
 			ProcessCommunicatorImpl pc = new ProcessCommunicatorImpl(knxNetworkLinkIP);
@@ -93,6 +113,14 @@ public class KnxConnectionFactory {
 				}
 			}
 			return pc;
+		} catch (KNXLinkClosedException knxLinkClosedException) {
+			if (retry) {
+				logger.error("Allready in retry, giving up");
+				throw new RuntimeException(knxLinkClosedException);
+			}
+			logger.error("Got knxLinkClosedException but going to retry", knxLinkClosedException);
+			buildLink();
+			return createProcessCommunicator(true, processListeners);
 		} catch (Exception e) {
 			logger.error("Could not create KNX ProcessCommunicator", e);
 			throw new RuntimeException(e);

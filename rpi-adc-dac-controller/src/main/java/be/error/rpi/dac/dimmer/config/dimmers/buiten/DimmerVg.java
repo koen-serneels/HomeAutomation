@@ -15,10 +15,11 @@ public class DimmerVg implements DimmerConfig {
 				name(VG);
 				ic2BoardAddress(0x5A);
 				boardChannel(2);
-				delayBeforeIncreasingDimValue(15);
+				delayBeforeIncreasingDimValue(0);
 
+				outputGroupAddressesForActorSwitchingOnAndOff("1/0/0");
 				//outputGroupAddressesForVisualisationStatusFeedback("");
-				//outputGroupAddressesForActorSwitchingOnAndOff("");
+
 				inputGroupAddressForAbsoluteDimValue("14/0/15");
 			}
 		}.build();

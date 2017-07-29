@@ -19,7 +19,7 @@ public class ObjectStatusTypeMapper {
 		{
 			add(new ObjectStatusTypeMapping(SHORT_CIRCUIT, "0.00", "4.00"));
 			add(new ObjectStatusTypeMapping(OPEN, "4.20", "4.40"));
-			add(new ObjectStatusTypeMapping(CLOSED, "4.45", "4.65"));
+			add(new ObjectStatusTypeMapping(CLOSED, "4.41", "4.65"));
 			add(new ObjectStatusTypeMapping(CIRCUIT_BREACH, "4.70", null));
 		}
 	};

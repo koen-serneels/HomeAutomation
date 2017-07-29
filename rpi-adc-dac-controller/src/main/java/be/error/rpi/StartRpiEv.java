@@ -19,6 +19,7 @@ import tuwien.auto.calimero.GroupAddress;
 
 import be.error.rpi.dac.dimmer.config.dimmers.buiten.DimmerAg;
 import be.error.rpi.dac.dimmer.config.dimmers.buiten.DimmerLzg;
+import be.error.rpi.dac.dimmer.config.dimmers.buiten.DimmerRzg;
 import be.error.rpi.dac.dimmer.config.dimmers.buiten.DimmerVg;
 import be.error.rpi.dac.dimmer.config.dimmers.ev.DimmerBadkamer;
 import be.error.rpi.dac.dimmer.config.dimmers.ev.DimmerDressing;
@@ -58,6 +59,7 @@ public class StartRpiEv {
 				new DimmerSk1().start();
 				new DimmerAg().start();
 				new DimmerLzg().start();
+				new DimmerRzg().start();
 				new DimmerVg().start();
 
 				getInstance().addUdpChannelCallback(new VentilationUdpCallback());

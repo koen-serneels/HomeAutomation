@@ -18,7 +18,7 @@ public class DimmerVoordeur implements DimmerConfig {
 				name(VOORDEUR);
 				ic2BoardAddress(0x5B);
 				boardChannel(1);
-				delayBeforeIncreasingDimValue(15);
+				delayBeforeIncreasingDimValue(0);
 
 				outputGroupAddressesForVisualisationStatusFeedback("15/0/8");
 				outputGroupAddressesForActorSwitchingOnAndOff("1/1/1");
