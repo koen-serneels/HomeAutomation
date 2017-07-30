@@ -37,8 +37,9 @@ public class RoomValveController {
 			return;
 		}
 
+		ProcessCommunicator pc = null;
 		try {
-			ProcessCommunicator pc = getInstance().getKnxConnectionFactory().createProcessCommunicator();
+			pc = getInstance().getKnxConnectionFactory().createProcessCommunicator();
 			for (GroupAddress ga : valves) {
 				logger.debug("Setting valve " + ga.toString() + " of room " + locationId + " to:" + heatingDemand);
 				pc.write(ga, heatingDemand);
@@ -47,6 +48,10 @@ public class RoomValveController {
 		} catch (Exception e) {
 			logger.error("Could not operate valve via KNX", e);
 			throw new RuntimeException(e);
+		} finally {
+			if (pc != null) {
+				pc.detach();
+			}
 		}
 	}
 

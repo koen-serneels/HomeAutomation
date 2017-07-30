@@ -14,6 +14,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import tuwien.auto.calimero.GroupAddress;
+import tuwien.auto.calimero.process.ProcessCommunicator;
 
 import be.error.rpi.ebus.EbusCommand;
 import be.error.rpi.ebus.EbusdTcpCommunicatorImpl;
@@ -26,6 +27,7 @@ public class HeatingInfoPollerJob implements Job {
 
 	@Override
 	public void execute(final JobExecutionContext context) throws JobExecutionException {
+		ProcessCommunicator processCommunicator = null;
 		try {
 			logger.debug("Status poller job starting...");
 			JobConfig jobConfig = (JobConfig) context.getJobDetail().getJobDataMap().get(JOB_CONFIG_KEY);
@@ -37,14 +39,15 @@ public class HeatingInfoPollerJob implements Job {
 				Object converted = entry.getKey().convertResult(result);
 				logger.debug("Sending result " + converted + " to GA: " + entry.getValue());
 
+				processCommunicator = getInstance().getKnxConnectionFactory().createProcessCommunicator();
 				if (converted instanceof Float) {
-					getInstance().getKnxConnectionFactory().createProcessCommunicator().write(entry.getValue(), (Float) converted, false);
+					processCommunicator.write(entry.getValue(), (Float) converted, false);
 				} else if (converted instanceof BigDecimal) {
-					getInstance().getKnxConnectionFactory().createProcessCommunicator().write(entry.getValue(), ((BigDecimal) converted).floatValue(), false);
+					processCommunicator.write(entry.getValue(), ((BigDecimal) converted).floatValue(), false);
 				} else if (converted instanceof Boolean) {
-					getInstance().getKnxConnectionFactory().createProcessCommunicator().write(entry.getValue(), (Boolean) converted);
+					processCommunicator.write(entry.getValue(), (Boolean) converted);
 				} else if (converted instanceof String) {
-					getInstance().getKnxConnectionFactory().createProcessCommunicator().write(entry.getValue(), (String) converted);
+					processCommunicator.write(entry.getValue(), (String) converted);
 				} else {
 					throw new IllegalStateException("Could not send type " + converted.getClass());
 				}
@@ -52,6 +55,10 @@ public class HeatingInfoPollerJob implements Job {
 		} catch (Exception e) {
 			logger.error(HeatingInfoPollerJob.class.getSimpleName() + " exception", e);
 			throw new JobExecutionException(e);
+		} finally {
+			if (processCommunicator != null) {
+				processCommunicator.detach();
+			}
 		}
 	}
 }
