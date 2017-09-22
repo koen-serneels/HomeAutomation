@@ -164,6 +164,7 @@ public class Dimmer extends Thread {
 	}
 
 	public synchronized void putCommand(DimmerCommand dimmerCommand) throws Exception {
+		commandQueue.clear();
 		commandQueue.put(dimmerCommand);
 	}
 
