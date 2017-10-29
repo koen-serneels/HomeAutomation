@@ -1,6 +1,5 @@
 <configuration>
 	<appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
-		²
 		<file>logs/application.log</file>
 		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
 			<fileNamePattern>application.%d{yyyy-MM-dd}.log</fileNamePattern>

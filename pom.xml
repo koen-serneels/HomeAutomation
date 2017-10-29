@@ -3,13 +3,10 @@
 		 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
 	<modelVersion>4.0.0</modelVersion>
-	<groupId>be.error.rpi</groupId>
-	<artifactId>rpi-adc-dac-controller</artifactId>
+	<groupId>be.error</groupId>
+	<artifactId>home-automation</artifactId>
 	<packaging>jar</packaging>
 	<version>0.0.1-SNAPSHOT</version>
-	<description>
-		ADC: reads values from ADC and transmits them over UDP for window/door control DAC: sends analog output values for dimmer control
-	</description>
 
 	<properties>
 		<sourceJavaVersion>1.8</sourceJavaVersion>
@@ -73,6 +70,24 @@
 					<artifactId>maven-source-plugin</artifactId>
 					<version>2.4</version>
 				</plugin>
+				<plugin>
+					<groupId>org.codehaus.mojo</groupId>
+					<artifactId>license-maven-plugin</artifactId>
+					<version>1.14</version>
+					<configuration>
+						<licenseName>license_template</licenseName>
+						<licenseResolver>${project.baseUri}/config</licenseResolver>
+					</configuration>
+					<executions>
+						<execution>
+							<id>first</id>
+							<goals>
+								<goal>update-file-header</goal>
+							</goals>
+							<phase>process-sources</phase>
+						</execution>
+					</executions>
+				</plugin>
 			</plugins>
 		</pluginManagement>
 
@@ -132,22 +147,22 @@
 			<dependency>
 				<groupId>com.pi4j</groupId>
 				<artifactId>pi4j-core</artifactId>
-				<version>1.0</version>
+				<version>1.1</version>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.commons</groupId>
 				<artifactId>commons-lang3</artifactId>
-				<version>3.4</version>
+				<version>3.6</version>
 			</dependency>
 			<dependency>
 				<groupId>commons-io</groupId>
 				<artifactId>commons-io</artifactId>
-				<version>2.5</version>
+				<version>2.6</version>
 			</dependency>
 			<dependency>
 				<groupId>commons-net</groupId>
 				<artifactId>commons-net</artifactId>
-				<version>3.5</version>
+				<version>3.6</version>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.commons</groupId>
@@ -157,17 +172,17 @@
 			<dependency>
 				<groupId>commons-codec</groupId>
 				<artifactId>commons-codec</artifactId>
-				<version>1.10</version>
+				<version>1.11</version>
 			</dependency>
 			<dependency>
 				<groupId>org.slf4j</groupId>
 				<artifactId>slf4j-api</artifactId>
-				<version>1.7.21</version>
+				<version>1.7.25</version>
 			</dependency>
 			<dependency>
 				<groupId>ch.qos.logback</groupId>
 				<artifactId>logback-classic</artifactId>
-				<version>1.1.7</version>
+				<version>1.2.3</version>
 			</dependency>
 
 			<dependency>
@@ -178,27 +193,35 @@
 			<dependency>
 				<groupId>com.google.guava</groupId>
 				<artifactId>guava</artifactId>
-				<version>19.0</version>
+				<version>23.0</version>
 			</dependency>
 			<dependency>
 				<groupId>org.quartz-scheduler</groupId>
 				<artifactId>quartz</artifactId>
-				<version>2.2.3</version>
+				<version>2.3.0</version>
 			</dependency>
 			<dependency>
 				<groupId>org.testng</groupId>
 				<artifactId>testng</artifactId>
-				<version>6.10</version>
+				<version>6.11</version>
 			</dependency>
 			<dependency>
 				<groupId>org.mockito</groupId>
 				<artifactId>mockito-core</artifactId>
-				<version>2.5.0</version>
+				<version>2.11.0</version>
 			</dependency>
 			<dependency>
 				<groupId>org.scream3r</groupId>
 				<artifactId>jssc</artifactId>
 				<version>2.8.0</version>
+			</dependency>
+
+			<dependency>
+				<groupId>com.lucid-control</groupId>
+				<artifactId>lucidio</artifactId>
+				<version>1.3</version>
+				<scope>system</scope>
+				<systemPath>${basedir}/lib/lucidio/lucidio.jar</systemPath>
 			</dependency>
 		</dependencies>
 	</dependencyManagement>
@@ -248,6 +271,11 @@
 			<groupId>org.quartz-scheduler</groupId>
 			<artifactId>quartz</artifactId>
 		</dependency>
+		<dependency>
+			<groupId>com.lucid-control</groupId>
+			<artifactId>lucidio</artifactId>
+		</dependency>
+
 		<dependency>
 			<groupId>org.testng</groupId>
 			<artifactId>testng</artifactId>
