@@ -74,19 +74,6 @@
 					<groupId>org.codehaus.mojo</groupId>
 					<artifactId>license-maven-plugin</artifactId>
 					<version>1.14</version>
-					<configuration>
-						<licenseName>license_template</licenseName>
-						<licenseResolver>${project.baseUri}/config</licenseResolver>
-					</configuration>
-					<executions>
-						<execution>
-							<id>first</id>
-							<goals>
-								<goal>update-file-header</goal>
-							</goals>
-							<phase>process-sources</phase>
-						</execution>
-					</executions>
 				</plugin>
 			</plugins>
 		</pluginManagement>
@@ -123,6 +110,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-enforcer-plugin</artifactId>
+				<version>1.4.1</version>
 				<executions>
 					<execution>
 						<id>enforce-java</id>
@@ -139,6 +127,43 @@
 					</execution>
 				</executions>
 			</plugin>
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>license-maven-plugin</artifactId>
+				<configuration>
+					<projectName>Home Automation</projectName>
+					<licenseName>apache_v2</licenseName>
+					<organizationName>error.be</organizationName>
+					<inceptionYear>2016</inceptionYear>
+					<copyrightOwners>Koen Serneels</copyrightOwners>
+					<outputDirectory>${project.basedir}/target/META-INF/licenses</outputDirectory>
+					<thirdPartyFilename>included_licenses.txt</thirdPartyFilename>
+					<useMissingFile>true</useMissingFile>
+					<useRepositoryMissingFiles>false</useRepositoryMissingFiles>
+					<addJavaLicenseAfterPackage>false</addJavaLicenseAfterPackage>
+					<roots>
+						<root>src/main/java</root>
+						<root>src/test</root>
+					</roots>
+				</configuration>
+				<executions>
+					<execution>
+						<id>first</id>
+						<goals>
+							<goal>update-file-header</goal>
+							<goal>update-project-license</goal>
+						</goals>
+						<phase>process-sources</phase>
+					</execution>
+					<execution>
+						<id>generate-licenses-list</id>
+						<goals>
+							<goal>add-third-party</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+
 		</plugins>
 	</build>
 
