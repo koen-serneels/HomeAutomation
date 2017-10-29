@@ -12,7 +12,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import tuwien.auto.calimero.GroupAddress;
-import tuwien.auto.calimero.process.ProcessCommunicator;
 
 import be.error.types.LocationId;
 
@@ -37,21 +36,17 @@ public class RoomValveController {
 			return;
 		}
 
-		ProcessCommunicator pc = null;
 		try {
-			pc = getInstance().getKnxConnectionFactory().createProcessCommunicator();
-			for (GroupAddress ga : valves) {
-				logger.debug("Setting valve " + ga.toString() + " of room " + locationId + " to:" + heatingDemand);
-				pc.write(ga, heatingDemand);
-			}
-			lastSendValveState = of(heatingDemand);
+			getInstance().getKnxConnectionFactory().runWithProcessCommunicator(pc -> {
+				for (GroupAddress ga : valves) {
+					logger.debug("Setting valve " + ga.toString() + " of room " + locationId + " to:" + heatingDemand);
+					pc.write(ga, heatingDemand);
+				}
+				lastSendValveState = of(heatingDemand);
+			});
 		} catch (Exception e) {
 			logger.error("Could not operate valve via KNX", e);
 			throw new RuntimeException(e);
-		} finally {
-			if (pc != null) {
-				pc.detach();
-			}
 		}
 	}
 

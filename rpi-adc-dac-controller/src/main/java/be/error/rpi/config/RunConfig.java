@@ -1,6 +1,7 @@
 package be.error.rpi.config;
 
 import static com.pi4j.io.i2c.I2CBus.BUS_1;
+import static java.lang.System.setProperty;
 
 import java.util.List;
 
@@ -53,6 +54,8 @@ public class RunConfig {
 
 	private EventBus adcEventBus = new EventBus();
 
+	private KnxConnectionFactory knxConnectionFactory;
+
 	private static RunConfig runConfig;
 
 	private RunConfig(String localIp) {
@@ -80,6 +83,8 @@ public class RunConfig {
 	}
 
 	public static void initialize(String localIp) {
+		setProperty("calimero.knxnetip.tunneling.resyncSkippedRcvSeq", "true");
+
 		runConfig = new RunConfig(localIp);
 		runConfig.initialize();
 	}
@@ -91,15 +96,11 @@ public class RunConfig {
 			i2CCommunicator.start();
 			udpChannel = new UdpChannel(UDP_CHAN_PORT);
 			udpChannel.start();
+			knxConnectionFactory = KnxConnectionFactory.initialize(runConfig.getKnxIp(), runConfig.getKnxPort(), runConfig.getLocalIp());
 		} catch (Exception e) {
 			logger.error("Could not start I2CCommunicator", e);
 			throw new RuntimeException(e);
 		}
-	}
-
-	//Lazy singleton initialization: only initialize when needed
-	private static class KnxConnection {
-		private static KnxConnectionFactory knxConnectionFactory = new KnxConnectionFactory(runConfig.getKnxIp(), runConfig.getKnxPort(), runConfig.getLocalIp());
 	}
 
 	public String getLocalIp() {
@@ -131,7 +132,7 @@ public class RunConfig {
 	}
 
 	public KnxConnectionFactory getKnxConnectionFactory() {
-		return KnxConnection.knxConnectionFactory;
+		return knxConnectionFactory;
 	}
 
 	public I2CCommunicator getI2CCommunicator() {

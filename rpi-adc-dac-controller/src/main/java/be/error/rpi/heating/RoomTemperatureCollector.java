@@ -55,7 +55,7 @@ public class RoomTemperatureCollector {
 			}
 		});
 
-		getInstance().getKnxConnectionFactory().createProcessCommunicator(new AbstractDimmerProcessListener() {
+		getInstance().getKnxConnectionFactory().addProcessListener(new AbstractDimmerProcessListener() {
 			@Override
 			public void groupWrite(final ProcessEvent e) {
 				if (e.getDestination().equals(currentTemperatureGa)) {

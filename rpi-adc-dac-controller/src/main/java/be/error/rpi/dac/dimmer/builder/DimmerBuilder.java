@@ -203,7 +203,7 @@ public class DimmerBuilder {
 
 			KnxDimmerProcessListener knxDimmerProcessListener = new KnxDimmerProcessListener(onOff, onOffOverride, precenseDetectorLock, dim, dimAbsolute,
 					dimAbsoluteOverride, minDimVal, dimmer);
-			getInstance().getKnxConnectionFactory().createProcessCommunicator(knxDimmerProcessListener);
+			getInstance().getKnxConnectionFactory().addProcessListener(knxDimmerProcessListener);
 			dimmer.setKnxDimmerProcessListener(knxDimmerProcessListener);
 			return dimmer;
 		} catch (Exception e) {

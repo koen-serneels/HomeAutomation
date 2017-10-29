@@ -25,6 +25,7 @@ import tuwien.auto.calimero.dptxlator.DPTXlator8BitUnsigned;
 import tuwien.auto.calimero.process.ProcessCommunicator;
 
 import be.error.rpi.dac.support.Support;
+import be.error.rpi.knx.KnxConnectionFactory;
 import be.error.types.LocationId;
 
 /**
@@ -59,7 +60,6 @@ public class Dimmer extends Thread {
 	private final int channel;
 
 	private KnxDimmerProcessListener knxDimmerProcessListener;
-	private final ProcessCommunicator pc;
 
 	private Optional<DimmerCommand> lastDimCommand = empty();
 	private Optional<DimmerCommand> activeScene = empty();
@@ -73,85 +73,87 @@ public class Dimmer extends Thread {
 		this.switchGroupAddresses = switchGroupAddresses;
 		this.feedbackGroupAddresses = feedbackGroupAddresses;
 		this.switchLedControlGroupAddresses = switchLedControlGroupAddresses;
-		this.pc = getInstance().getKnxConnectionFactory().createProcessCommunicator();
 	}
 
 	public void run() {
-
 		while (true) {
 			try {
-				DimmerCommand dimmerCommand = commandQueue.take();
-				interupt.set(false);
-				boolean feedbackSend = false;
+				DimmerCommand command = commandQueue.take();
 
-				if (dimmerCommand.getSceneContext().isPresent()) {
-					if (dimmerCommand.getSceneContext().get().isSceneActive()) {
-						lastDimCommand = empty();
-						activeScene = of(dimmerCommand);
-						activateSceneLeds();
-					} else {
-						activeScene = empty();
-						dimmerCommand = dimmerCommand.isUseThisDimCommandOnSceneDeativate() ? dimmerCommand : lastDimCommand.orElse(dimmerCommand);
-					}
-				} else {
-					lastDimCommand = of(dimmerCommand);
-					if ((dimmerCommand.getTargetVal().compareTo(ZERO) == 0)) {
-						if ((activeScene.isPresent())) {
-							activateSceneLeds();
-							dimmerCommand = activeScene.get();
-							sendFeedback(dimmerCommand.getTargetVal().intValue(), true);
-							feedbackSend = true;
+				KnxConnectionFactory.getInstance().runWithProcessCommunicator(pc -> {
+					DimmerCommand dimmerCommand = command;
+					interupt.set(false);
+					boolean feedbackSend = false;
+
+					if (dimmerCommand.getSceneContext().isPresent()) {
+						if (dimmerCommand.getSceneContext().get().isSceneActive()) {
+							lastDimCommand = empty();
+							activeScene = of(dimmerCommand);
+							activateSceneLeds(pc);
+						} else {
+							activeScene = empty();
+							dimmerCommand = dimmerCommand.isUseThisDimCommandOnSceneDeativate() ? dimmerCommand : lastDimCommand.orElse(dimmerCommand);
 						}
 					} else {
-						activateAllLedsAndFeedback();
-						sleep(delayBeforeIncreasingDimValue);
+						lastDimCommand = of(dimmerCommand);
+						if ((dimmerCommand.getTargetVal().compareTo(ZERO) == 0)) {
+							if ((activeScene.isPresent())) {
+								activateSceneLeds(pc);
+								dimmerCommand = activeScene.get();
+								sendFeedback(pc, dimmerCommand.getTargetVal().intValue(), true);
+								feedbackSend = true;
+							}
+						} else {
+							activateAllLedsAndFeedback(pc);
+							sleep(delayBeforeIncreasingDimValue);
+						}
 					}
-				}
 
-				if (dimmerCommand.getTargetVal().compareTo(curVal) > 0) {
-					lastDimDirection = UP;
-				} else if (dimmerCommand.getTargetVal().compareTo(curVal) < 0) {
-					lastDimDirection = DOWN;
-				} else {
-					lastDimDirection = (lastDimDirection == UP ? DOWN : UP);
-				}
-
-				while (curVal.compareTo(dimmerCommand.getTargetVal()) != 0) {
-					processCommand(dimmerCommand);
-					if (commandQueue.peek() != null) {
-						break;
+					if (dimmerCommand.getTargetVal().compareTo(curVal) > 0) {
+						lastDimDirection = UP;
+					} else if (dimmerCommand.getTargetVal().compareTo(curVal) < 0) {
+						lastDimDirection = DOWN;
+					} else {
+						lastDimDirection = (lastDimDirection == UP ? DOWN : UP);
 					}
-					if (interupt.get()) {
-						break;
-					}
-					sleep(stepDelay);
-					if (interupt.get()) {
-						break;
-					}
-				}
 
-				if (!feedbackSend && !getInstance().getLoxoneIa().equals(dimmerCommand.getOrigin())) {
-					sendFeedback(getCurVal().intValue(), false);
-				}
-
-				if (curVal.compareTo(ZERO) == 0) {
-					for (int i = 0; i < turnOffDelay; i++) {
-						sleep(1);
+					while (curVal.compareTo(dimmerCommand.getTargetVal()) != 0) {
+						processCommand(dimmerCommand);
+						if (commandQueue.peek() != null) {
+							break;
+						}
+						if (interupt.get()) {
+							break;
+						}
+						sleep(stepDelay);
 						if (interupt.get()) {
 							break;
 						}
 					}
 
-					if (!interupt.get()) {
-						for (GroupAddress groupAddress : union(union(switchGroupAddresses, switchLedControlGroupAddresses), outputSwitchUpdateGroupAddresses)) {
-							try {
-								pc.write(groupAddress, false);
-							} catch (Exception e) {
-								logger.error("Dimmer " + dimmerName + " turnoff delay threed got exception while sending to " + groupAddress.toString(), e);
+					if (!feedbackSend && !getInstance().getLoxoneIa().equals(dimmerCommand.getOrigin())) {
+						sendFeedback(pc, getCurVal().intValue(), false);
+					}
+
+					if (curVal.compareTo(ZERO) == 0) {
+						for (int i = 0; i < turnOffDelay; i++) {
+							sleep(1);
+							if (interupt.get()) {
+								break;
+							}
+						}
+
+						if (!interupt.get()) {
+							for (GroupAddress groupAddress : union(union(switchGroupAddresses, switchLedControlGroupAddresses), outputSwitchUpdateGroupAddresses)) {
+								try {
+									pc.write(groupAddress, false);
+								} catch (Exception e) {
+									logger.error("Dimmer " + dimmerName + " turnoff delay threed got exception while sending to " + groupAddress.toString(), e);
+								}
 							}
 						}
 					}
-				}
+				});
 			} catch (InterruptedException e) {
 				logger.error("Dimmer " + dimmerName + " got interrupt", e);
 				interrupt();
@@ -172,13 +174,13 @@ public class Dimmer extends Thread {
 		interupt.set(true);
 	}
 
-	private void activateAllLedsAndFeedback() throws Exception {
+	private void activateAllLedsAndFeedback(ProcessCommunicator pc) throws Exception {
 		for (GroupAddress groupAddress : union(union(switchGroupAddresses, switchLedControlGroupAddresses), outputSwitchUpdateGroupAddresses)) {
 			pc.write(groupAddress, true);
 		}
 	}
 
-	private void activateSceneLeds() throws Exception {
+	private void activateSceneLeds(ProcessCommunicator pc) throws Exception {
 		for (GroupAddress groupAddress : union(union(switchGroupAddresses, switchLedControlGroupAddresses), outputSwitchUpdateGroupAddresses)) {
 			pc.write(groupAddress, false);
 		}
@@ -187,7 +189,7 @@ public class Dimmer extends Thread {
 		}
 	}
 
-	private void sendFeedback(int val, boolean refresh) throws Exception {
+	private void sendFeedback(ProcessCommunicator pc, int val, boolean refresh) throws Exception {
 		for (GroupAddress groupAddress : feedbackGroupAddresses) {
 
 			DPTXlator8BitUnsigned dDPTXlator8BitUnsigned = new DPTXlator8BitUnsigned(DPT_PERCENT_U8);

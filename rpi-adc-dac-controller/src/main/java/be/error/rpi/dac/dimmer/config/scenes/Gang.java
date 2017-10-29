@@ -83,7 +83,7 @@ public class Gang implements Runnable {
 				}
 			}
 		};
-		getInstance().getKnxConnectionFactory().createProcessCommunicator(processListenerAdapter);
+		getInstance().getKnxConnectionFactory().addProcessListener(processListenerAdapter);
 	}
 
 	@Subscribe

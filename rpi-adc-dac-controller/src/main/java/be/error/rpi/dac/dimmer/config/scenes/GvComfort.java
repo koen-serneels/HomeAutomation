@@ -11,7 +11,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import tuwien.auto.calimero.GroupAddress;
-import tuwien.auto.calimero.process.ProcessCommunicator;
 import tuwien.auto.calimero.process.ProcessEvent;
 
 import be.error.rpi.dac.dimmer.builder.Dimmer;
@@ -31,13 +30,10 @@ public class GvComfort implements Runnable {
 
 	private boolean active;
 
-	private ProcessCommunicator pc;
-
 	public GvComfort(final Dimmer eethoek, final Dimmer zithoek, final Dimmer keuken) {
 		this.eethoek = eethoek;
 		this.zithoek = zithoek;
 		this.keuken = keuken;
-		this.pc = getInstance().getKnxConnectionFactory().createProcessCommunicator();
 	}
 
 	@Override
@@ -60,15 +56,15 @@ public class GvComfort implements Runnable {
 				super.groupWrite(e);
 			}
 		};
-		getInstance().getKnxConnectionFactory().createProcessCommunicator(processListenerAdapter);
+		getInstance().getKnxConnectionFactory().addProcessListener(processListenerAdapter);
 	}
 
 	private void sceneOne(boolean on, ProcessEvent e) throws Exception {
 
 		if (on) {
-			pc.write(new GroupAddress("11/0/1"), true);
+			getInstance().getKnxConnectionFactory().runWithProcessCommunicator(pc -> pc.write(new GroupAddress("11/0/1"), true));
 		} else {
-			pc.write(new GroupAddress("11/0/1"), false);
+			getInstance().getKnxConnectionFactory().runWithProcessCommunicator(pc -> pc.write(new GroupAddress("11/0/1"), false));
 		}
 
 		eethoek.interrupt();

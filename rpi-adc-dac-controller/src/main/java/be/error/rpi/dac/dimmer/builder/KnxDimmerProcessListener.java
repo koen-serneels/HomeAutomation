@@ -12,7 +12,6 @@ import org.slf4j.LoggerFactory;
 
 import tuwien.auto.calimero.DetachEvent;
 import tuwien.auto.calimero.GroupAddress;
-import tuwien.auto.calimero.process.ProcessCommunicator;
 import tuwien.auto.calimero.process.ProcessEvent;
 
 /**
@@ -22,7 +21,6 @@ public class KnxDimmerProcessListener extends AbstractDimmerProcessListener {
 
 	protected static final Logger logger = LoggerFactory.getLogger(KnxDimmerProcessListener.class);
 
-	private final ProcessCommunicator pc;
 	private final GroupAddress onOff;
 	private final Optional<GroupAddress> precenseDetectorLock;
 	private final Optional<GroupAddress> onOffOverride;
@@ -45,7 +43,6 @@ public class KnxDimmerProcessListener extends AbstractDimmerProcessListener {
 			this.minDimVal = minDimVal.get();
 		}
 
-		this.pc = getInstance().getKnxConnectionFactory().createProcessCommunicator();
 		setDimmer(dimmer);
 	}
 
@@ -61,7 +58,7 @@ public class KnxDimmerProcessListener extends AbstractDimmerProcessListener {
 					DimmerCommand dimmerCommand = new DimmerCommand(dimmer.getLastDimDirection() == UP ? new BigDecimal(minDimVal) : new BigDecimal(100),
 							e.getSourceAddr());
 					if (onOffOverride.isPresent()) {
-						pc.write(precenseDetectorLock.get(), true);
+						getInstance().getKnxConnectionFactory().runWithProcessCommunicator(pc -> pc.write(precenseDetectorLock.get(), true));
 						dimmerCommand.setOverride();
 					}
 					dimmer.putCommand(dimmerCommand);
@@ -80,10 +77,10 @@ public class KnxDimmerProcessListener extends AbstractDimmerProcessListener {
 				int i = asUnsigned(e, SCALING);
 				DimmerCommand dimmerCommand = new DimmerCommand(new BigDecimal(i), e.getSourceAddr());
 				if (i > 0) {
-					pc.write(precenseDetectorLock.get(), true);
+					getInstance().getKnxConnectionFactory().runWithProcessCommunicator(pc -> pc.write(precenseDetectorLock.get(), true));
 					dimmerCommand.setOverride();
 				} else {
-					pc.write(precenseDetectorLock.get(), false);
+					getInstance().getKnxConnectionFactory().runWithProcessCommunicator(pc -> pc.write(precenseDetectorLock.get(), false));
 				}
 				dimmer.putCommand(dimmerCommand);
 			}
@@ -103,10 +100,10 @@ public class KnxDimmerProcessListener extends AbstractDimmerProcessListener {
 				boolean b = asBool(e);
 				DimmerCommand dimmerCommand = new DimmerCommand(b ? new BigDecimal(100) : new BigDecimal(0), e.getSourceAddr());
 				if (b) {
-					pc.write(precenseDetectorLock.get(), true);
+					getInstance().getKnxConnectionFactory().runWithProcessCommunicator(pc -> pc.write(precenseDetectorLock.get(), true));
 					dimmerCommand.setOverride();
 				} else {
-					pc.write(precenseDetectorLock.get(), false);
+					getInstance().getKnxConnectionFactory().runWithProcessCommunicator(pc -> pc.write(precenseDetectorLock.get(), false));
 				}
 				dimmer.putCommand(dimmerCommand);
 			}
