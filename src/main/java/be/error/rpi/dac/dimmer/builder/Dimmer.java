@@ -22,6 +22,9 @@ package be.error.rpi.dac.dimmer.builder;
 import static be.error.rpi.config.RunConfig.getInstance;
 import static be.error.rpi.dac.dimmer.builder.DimDirection.DOWN;
 import static be.error.rpi.dac.dimmer.builder.DimDirection.UP;
+import static be.error.rpi.dac.dimmer.builder.DimmerBackend.I2C;
+import static be.error.rpi.dac.support.Support.convertPercentageTo10Volt;
+import static be.error.rpi.dac.support.Support.convertPercentageToDacBytes;
 import static java.util.Optional.empty;
 import static java.util.Optional.of;
 import static org.apache.commons.collections4.CollectionUtils.union;
@@ -39,11 +42,12 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import lucidio.LucidControlAO4;
+import lucidio.ValueVOS2;
 import tuwien.auto.calimero.GroupAddress;
 import tuwien.auto.calimero.dptxlator.DPTXlator8BitUnsigned;
 import tuwien.auto.calimero.process.ProcessCommunicator;
 
-import be.error.rpi.dac.support.Support;
 import be.error.rpi.knx.KnxConnectionFactory;
 import be.error.types.LocationId;
 
@@ -75,6 +79,7 @@ public class Dimmer extends Thread {
 	private final BlockingQueue<DimmerCommand> commandQueue = new LinkedBlockingDeque();
 
 	private final LocationId dimmerName;
+	private final DimmerBackend dimmerBackend;
 	private final int boardAddress;
 	private final int channel;
 
@@ -83,10 +88,12 @@ public class Dimmer extends Thread {
 	private Optional<DimmerCommand> lastDimCommand = empty();
 	private Optional<DimmerCommand> activeScene = empty();
 
-	public Dimmer(LocationId dimmerName, int boardAddress, int channel, List<GroupAddress> switchGroupAddresses, List<GroupAddress> feedbackGroupAddresses,
-			List<GroupAddress> switchLedControlGroupAddresses, List<GroupAddress> outputSwitchUpdateGroupAddresses) throws IOException {
+	public Dimmer(LocationId dimmerName, DimmerBackend dimmerBackend, int boardAddress, int channel, List<GroupAddress> switchGroupAddresses,
+			List<GroupAddress> feedbackGroupAddresses, List<GroupAddress> switchLedControlGroupAddresses, List<GroupAddress> outputSwitchUpdateGroupAddresses)
+			throws IOException {
 
 		this.dimmerName = dimmerName;
+		this.dimmerBackend = dimmerBackend;
 		this.boardAddress = boardAddress;
 		this.channel = channel;
 		this.switchGroupAddresses = switchGroupAddresses;
@@ -239,8 +246,13 @@ public class Dimmer extends Thread {
 	}
 
 	private void dim(BigDecimal targetValue) throws IOException {
-		byte[] b = Support.convertPercentageToDacBytes(targetValue);
-		getInstance().getI2CCommunicator().write(boardAddress, channel, b);
+		if (dimmerBackend == I2C) {
+			byte[] b = convertPercentageToDacBytes(targetValue);
+			getInstance().getI2CCommunicator().write(boardAddress, channel, b);
+		} else {
+			LucidControlAO4 lucidControlAO4 = getInstance().getLucidControlAO4(boardAddress);
+			lucidControlAO4.setIo(channel, new ValueVOS2(convertPercentageTo10Volt(targetValue)));
+		}
 	}
 
 	public BigDecimal getCurVal() {

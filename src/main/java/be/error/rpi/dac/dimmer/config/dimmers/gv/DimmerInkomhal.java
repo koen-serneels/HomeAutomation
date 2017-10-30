@@ -35,7 +35,8 @@ public class DimmerInkomhal implements DimmerConfig {
 		return new DimmerBuilder() {
 			{
 				name(INKOMHAL);
-				ic2BoardAddress(0x59);
+				lucidControl();
+				boardAddress(0);
 				boardChannel(0);
 				delayBeforeIncreasingDimValue(15);
 

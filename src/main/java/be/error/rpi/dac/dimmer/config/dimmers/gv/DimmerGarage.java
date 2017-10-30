@@ -32,7 +32,7 @@ public class DimmerGarage implements DimmerConfig {
 		return new DimmerBuilder() {
 			{
 				name(GARAGE);
-				ic2BoardAddress(0x58);
+				boardAddress(0x58);
 				boardChannel(0);
 				delayBeforeIncreasingDimValue(15);
 

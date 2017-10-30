@@ -35,7 +35,7 @@ public class DimmerVoordeur implements DimmerConfig {
 		return new DimmerBuilder() {
 			{
 				name(VOORDEUR);
-				ic2BoardAddress(0x5B);
+				boardAddress(0x5B);
 				boardChannel(1);
 				delayBeforeIncreasingDimValue(0);
 

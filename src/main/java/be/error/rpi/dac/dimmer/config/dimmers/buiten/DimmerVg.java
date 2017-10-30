@@ -32,7 +32,7 @@ public class DimmerVg implements DimmerConfig {
 		return new DimmerBuilder() {
 			{
 				name(VG);
-				ic2BoardAddress(0x5A);
+				boardAddress(0x5A);
 				boardChannel(2);
 				delayBeforeIncreasingDimValue(0);
 

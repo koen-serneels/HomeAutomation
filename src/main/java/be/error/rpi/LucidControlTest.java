@@ -38,5 +38,6 @@ public class LucidControlTest {
 		ValueVOS4 val = new ValueVOS4();
 		lucidControlAO4.getIo(0, val);
 		System.err.println("Value after:" + val.getVoltage());
+
 	}
 }

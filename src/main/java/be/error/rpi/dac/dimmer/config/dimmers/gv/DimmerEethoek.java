@@ -35,7 +35,7 @@ public class DimmerEethoek implements DimmerConfig {
 		return new DimmerBuilder() {
 			{
 				name(EETHOEK);
-				ic2BoardAddress(0x5B);
+				boardAddress(0x5B);
 				boardChannel(0);
 				delayBeforeIncreasingDimValue(15);
 

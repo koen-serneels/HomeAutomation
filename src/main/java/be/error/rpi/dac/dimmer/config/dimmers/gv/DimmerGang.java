@@ -35,7 +35,8 @@ public class DimmerGang implements DimmerConfig {
 		return new DimmerBuilder() {
 			{
 				name(GANG);
-				ic2BoardAddress(0x59);
+				lucidControl();
+				boardAddress(0);
 				boardChannel(3);
 				delayBeforeIncreasingDimValue(15);
 

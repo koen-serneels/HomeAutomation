@@ -32,7 +32,7 @@ public class DimmerKeuken implements DimmerConfig {
 		return new DimmerBuilder() {
 			{
 				name(KEUKEN);
-				ic2BoardAddress(0x5B);
+				boardAddress(0x5B);
 				boardChannel(2);
 				delayBeforeIncreasingDimValue(15);
 

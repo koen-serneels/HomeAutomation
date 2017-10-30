@@ -20,6 +20,8 @@
 package be.error.rpi.dac.dimmer.builder;
 
 import static be.error.rpi.config.RunConfig.getInstance;
+import static be.error.rpi.dac.dimmer.builder.DimmerBackend.I2C;
+import static be.error.rpi.dac.dimmer.builder.DimmerBackend.LUCID_CONTROL;
 import static be.error.rpi.knx.Support.createGroupAddress;
 import static java.util.Arrays.asList;
 import static java.util.Optional.empty;
@@ -45,6 +47,7 @@ public class DimmerBuilder {
 	private static final Logger logger = LoggerFactory.getLogger(DimmerBuilder.class);
 
 	private LocationId name;
+	private DimmerBackend dimmerBackend = I2C;
 	private int boardAddress;
 	private int channel;
 
@@ -76,15 +79,15 @@ public class DimmerBuilder {
 	}
 
 	/**
-	 * The I2C address of the RPI DAC extension board to which the analog in of the dimmers is connected
+	 * The address of the module to which the analog in of the dimmers is connected
 	 */
-	public DimmerBuilder ic2BoardAddress(int boardAddress) {
+	public DimmerBuilder boardAddress(int boardAddress) {
 		this.boardAddress = boardAddress;
 		return this;
 	}
 
 	/**
-	 * The specific channel of the RPI DAC extension board to which the analog in of the dimmers is connected (starts with 0)
+	 * The specific channel of the RPI DAC extension board to which the analog in of the dimmers is connected
 	 */
 	public DimmerBuilder boardChannel(int channel) {
 		this.channel = channel;
@@ -120,7 +123,6 @@ public class DimmerBuilder {
 
 	/**
 	 * When the light is turned off, keep the light at min. dim value for the stated delay. Then turn it off completely.
-	 * For default
 	 */
 	public DimmerBuilder turnOffDelay(final long turnOffDelay) {
 		this.turnOffDelay = of(turnOffDelay);
@@ -202,9 +204,13 @@ public class DimmerBuilder {
 		return this;
 	}
 
+	public void lucidControl() {
+		this.dimmerBackend = LUCID_CONTROL;
+	}
+
 	public Dimmer build() {
 		try {
-			Dimmer dimmer = new Dimmer(name, boardAddress, channel, switchGroupAddresses, feedbackGroupAddresses, switchLedControlGroupAddresses,
+			Dimmer dimmer = new Dimmer(name, dimmerBackend, boardAddress, channel, switchGroupAddresses, feedbackGroupAddresses, switchLedControlGroupAddresses,
 					switchUpdateGroupAddresses);
 
 			if (delayBeforeIncreasingDimValue.isPresent()) {

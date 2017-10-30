@@ -35,7 +35,7 @@ public class DimmerZitHoek implements DimmerConfig {
 		return new DimmerBuilder() {
 			{
 				name(ZITHOEK);
-				ic2BoardAddress(0x5B);
+				boardAddress(0x5B);
 				boardChannel(3);
 				delayBeforeIncreasingDimValue(15);
 

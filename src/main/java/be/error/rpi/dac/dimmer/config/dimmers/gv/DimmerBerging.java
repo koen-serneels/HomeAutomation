@@ -35,7 +35,8 @@ public class DimmerBerging implements DimmerConfig {
 		return new DimmerBuilder() {
 			{
 				name(BERGING);
-				ic2BoardAddress(0x59);
+				lucidControl();
+				boardAddress(0);
 				boardChannel(1);
 				delayBeforeIncreasingDimValue(15);
 

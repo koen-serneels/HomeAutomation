@@ -35,7 +35,7 @@ public class DimmerSk1 implements DimmerConfig {
 		return new DimmerBuilder() {
 			{
 				name(SK1);
-				ic2BoardAddress(0x5B);
+				boardAddress(0x5B);
 				boardChannel(0);
 
 				outputGroupAddressesForActorSwitchingOnAndOff("4/0/0", "4/0/9");

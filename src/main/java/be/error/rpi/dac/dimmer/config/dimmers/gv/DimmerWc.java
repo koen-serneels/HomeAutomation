@@ -32,7 +32,8 @@ public class DimmerWc implements DimmerConfig {
 		return new DimmerBuilder() {
 			{
 				name(WC);
-				ic2BoardAddress(0x59);
+				lucidControl();
+				boardAddress(0);
 				boardChannel(2);
 				inputGroupAddressForOnAndOff("5/2/0");
 				outputGroupAddressesForVisualisationStatusFeedback("15/0/10");

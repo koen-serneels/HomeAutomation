@@ -22,7 +22,10 @@ package be.error.rpi.config;
 import static com.pi4j.io.i2c.I2CBus.BUS_1;
 import static java.lang.System.setProperty;
 
+import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.quartz.Scheduler;
@@ -35,6 +38,7 @@ import com.google.common.eventbus.EventBus;
 import com.pi4j.io.i2c.I2CBus;
 import com.pi4j.io.i2c.I2CFactory;
 
+import lucidio.LucidControlAO4;
 import tuwien.auto.calimero.IndividualAddress;
 import tuwien.auto.calimero.exception.KNXException;
 
@@ -70,6 +74,8 @@ public class RunConfig {
 	private I2CBus bus;
 	private I2CCommunicator i2CCommunicator;
 	private UdpChannel udpChannel;
+
+	private Map<Integer, LucidControlAO4> lucidControlMap = new HashMap<>();
 
 	private EventBus adcEventBus = new EventBus();
 
@@ -122,6 +128,12 @@ public class RunConfig {
 		}
 	}
 
+	public void registerLucidControlAO4(int portId, String portName) throws IOException {
+		LucidControlAO4 lucidControlAO4 = new LucidControlAO4(portName);
+		lucidControlAO4.open();
+		lucidControlMap.put(portId, lucidControlAO4);
+	}
+
 	public String getLocalIp() {
 		return LOCAL_IP;
 	}
@@ -156,6 +168,10 @@ public class RunConfig {
 
 	public I2CCommunicator getI2CCommunicator() {
 		return i2CCommunicator;
+	}
+
+	public LucidControlAO4 getLucidControlAO4(Integer device) {
+		return lucidControlMap.get(device);
 	}
 
 	public int getEbusdPort() {

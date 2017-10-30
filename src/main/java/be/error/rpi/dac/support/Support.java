@@ -40,4 +40,9 @@ public class Support {
 		}
 		return b;
 	}
+
+	public static double convertPercentageTo10Volt(BigDecimal bigDecimal) {
+		BigDecimal result = bigDecimal.divide(new BigDecimal(10)).setScale(2, RoundingMode.HALF_UP);
+		return result.doubleValue();
+	}
 }

@@ -36,7 +36,7 @@ public class DimmerBadkamer implements DimmerConfig {
 		return new DimmerBuilder() {
 			{
 				name(BADKAMER);
-				ic2BoardAddress(0x5B);
+				boardAddress(0x5B);
 				boardChannel(3);
 
 				outputGroupAddressesForVisualisationStatusFeedback("15/0/2");

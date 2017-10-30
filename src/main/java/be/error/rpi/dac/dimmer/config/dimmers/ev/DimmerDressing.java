@@ -35,7 +35,7 @@ public class DimmerDressing implements DimmerConfig{
 		return  new DimmerBuilder() {
 			{
 				name(DRESSING);
-				ic2BoardAddress(0x5B);
+				boardAddress(0x5B);
 				boardChannel(2);
 				outputGroupAddressesForVisualisationStatusFeedback("15/0/3");
 				outputGroupAddressesForActorSwitchingOnAndOff("4/6/1");

@@ -35,7 +35,7 @@ public class DimmerNachthal implements DimmerConfig {
 		return new DimmerBuilder() {
 			{
 				name(NACHTHAL);
-				ic2BoardAddress(0x5B);
+				boardAddress(0x5B);
 				boardChannel(1);
 				outputGroupAddressesForVisualisationStatusFeedback("15/0/4");
 				outputGroupAddressesForActorSwitchingOnAndOff("4/7/1");

@@ -32,7 +32,7 @@ public class DimmerRzg implements DimmerConfig {
 		return new DimmerBuilder() {
 			{
 				name(RZG);
-				ic2BoardAddress(0x5A);
+				boardAddress(0x5A);
 				boardChannel(0);
 				delayBeforeIncreasingDimValue(0);
 
