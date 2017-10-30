@@ -65,7 +65,7 @@ public class StartRpiGv {
 
 	public static void main(String[] args) throws Exception {
 		initialize(RPI_LAN_IP);
-		getInstance().registerLucidControlAO4(0, "/dev/ttyACM0");
+		getInstance().registerLucidControlAO4(0, "/dev/lucidAO0");
 
 		Map<EbusCommand<?>, GroupAddress> config = new HashMap<>();
 		config.put(new GetHeatingCircuitHeatingDemandGv(), createGroupAddress("10/2/1"));

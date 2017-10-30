@@ -23,9 +23,11 @@ import static com.pi4j.io.i2c.I2CBus.BUS_1;
 import static java.lang.System.setProperty;
 
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.quartz.Scheduler;
@@ -128,10 +130,41 @@ public class RunConfig {
 		}
 	}
 
-	public void registerLucidControlAO4(int portId, String portName) throws IOException {
+	public void doWithLucidControl(Integer device, Consumer<LucidControlAO4> consumer) {
+		try {
+			consumer.accept(lucidControlMap.get(device));
+		} catch (UncheckedIOException uncheckedIoException) {
+			reInitLucidControls();
+			doWithLucidControl(device, consumer);
+		}
+	}
+
+	public synchronized void registerLucidControlAO4(int portId, String portName) throws IOException {
 		LucidControlAO4 lucidControlAO4 = new LucidControlAO4(portName);
 		lucidControlAO4.open();
 		lucidControlMap.put(portId, lucidControlAO4);
+	}
+
+	private synchronized void reInitLucidControls() {
+		lucidControlMap.forEach((e, v) -> {
+			try {
+				v.close();
+			} catch (IOException ioException) {
+				//Ignore
+			}
+			try {
+				v.open();
+				logger.error("Connection to Lucid device " + e + " re-established");
+			} catch (IOException ioException) {
+				logger.error("Could not re-open connection to Lucid device " + e + "", ioException);
+				try {
+					Thread.sleep(2000);
+				} catch (InterruptedException interruptedException) {
+					//Do nothing
+				}
+				reInitLucidControls();
+			}
+		});
 	}
 
 	public String getLocalIp() {
@@ -168,10 +201,6 @@ public class RunConfig {
 
 	public I2CCommunicator getI2CCommunicator() {
 		return i2CCommunicator;
-	}
-
-	public LucidControlAO4 getLucidControlAO4(Integer device) {
-		return lucidControlMap.get(device);
 	}
 
 	public int getEbusdPort() {

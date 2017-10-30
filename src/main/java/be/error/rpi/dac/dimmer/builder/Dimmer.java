@@ -31,6 +31,7 @@ import static org.apache.commons.collections4.CollectionUtils.union;
 import static tuwien.auto.calimero.dptxlator.DPTXlator8BitUnsigned.DPT_PERCENT_U8;
 
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
@@ -42,7 +43,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import lucidio.LucidControlAO4;
 import lucidio.ValueVOS2;
 import tuwien.auto.calimero.GroupAddress;
 import tuwien.auto.calimero.dptxlator.DPTXlator8BitUnsigned;
@@ -250,8 +250,13 @@ public class Dimmer extends Thread {
 			byte[] b = convertPercentageToDacBytes(targetValue);
 			getInstance().getI2CCommunicator().write(boardAddress, channel, b);
 		} else {
-			LucidControlAO4 lucidControlAO4 = getInstance().getLucidControlAO4(boardAddress);
-			lucidControlAO4.setIo(channel, new ValueVOS2(convertPercentageTo10Volt(targetValue)));
+			getInstance().doWithLucidControl(boardAddress, (lucidControlAO4) -> {
+				try {
+					lucidControlAO4.setIo(channel, new ValueVOS2(convertPercentageTo10Volt(targetValue)));
+				} catch (IOException e) {
+					throw new UncheckedIOException(e);
+				}
+			});
 		}
 	}
 
