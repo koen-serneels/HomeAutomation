@@ -130,41 +130,43 @@ public class RunConfig {
 		}
 	}
 
-	public void doWithLucidControl(Integer device, Consumer<LucidControlAO4> consumer) {
-		try {
-			consumer.accept(lucidControlMap.get(device));
-		} catch (UncheckedIOException uncheckedIoException) {
-			reInitLucidControls();
-			doWithLucidControl(device, consumer);
+	public synchronized void doWithLucidControl(Integer device, Consumer<LucidControlAO4> consumer) {
+		LucidControlAO4 lucidControlAO4 = lucidControlMap.get(device);
+		synchronized (lucidControlAO4) {
+			try {
+				consumer.accept(lucidControlAO4);
+			} catch (UncheckedIOException uncheckedIoException) {
+				logger.error("Lucid control " + lucidControlAO4.getDeviceSnr() + " had IO error, trying to recover", uncheckedIoException.getCause());
+				reInitLucidControl(lucidControlAO4);
+				doWithLucidControl(device, consumer);
+			}
 		}
 	}
 
 	public synchronized void registerLucidControlAO4(int portId, String portName) throws IOException {
 		LucidControlAO4 lucidControlAO4 = new LucidControlAO4(portName);
-		lucidControlAO4.open();
+			lucidControlAO4.open();
 		lucidControlMap.put(portId, lucidControlAO4);
 	}
 
-	private synchronized void reInitLucidControls() {
-		lucidControlMap.forEach((e, v) -> {
+	private synchronized void reInitLucidControl(LucidControlAO4 lucidControlAO4) {
+		try {
+			lucidControlAO4.close();
+		} catch (IOException ioException) {
+			logger.warn("WARNING could not close lucid control " + lucidControlAO4.getDeviceSnr());
+		}
+		try {
+			lucidControlAO4.open();
+			logger.error("Connection to Lucid device " + lucidControlAO4.getDeviceSnr() + " re-established");
+		} catch (IOException ioException) {
+			logger.error("Could not re-open connection to Lucid device " + lucidControlAO4.getDeviceSnr() + "", ioException);
 			try {
-				v.close();
-			} catch (IOException ioException) {
-				//Ignore
+				Thread.sleep(2000);
+			} catch (InterruptedException interruptedException) {
+				//Do nothing
 			}
-			try {
-				v.open();
-				logger.error("Connection to Lucid device " + e + " re-established");
-			} catch (IOException ioException) {
-				logger.error("Could not re-open connection to Lucid device " + e + "", ioException);
-				try {
-					Thread.sleep(2000);
-				} catch (InterruptedException interruptedException) {
-					//Do nothing
-				}
-				reInitLucidControls();
-			}
-		});
+			reInitLucidControl(lucidControlAO4);
+		}
 	}
 
 	public String getLocalIp() {
