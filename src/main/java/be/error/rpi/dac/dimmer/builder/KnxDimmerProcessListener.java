@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -46,18 +46,22 @@ public class KnxDimmerProcessListener extends AbstractDimmerProcessListener {
 	private final Optional<GroupAddress> dim;
 	private final Optional<GroupAddress> dimAbsolute;
 	private final Optional<GroupAddress> dimAbsoluteOverride;
+	private final Optional<GroupAddress> deactivateOnOtherUse;
 
 	private int minDimVal = 1;
 
+	private boolean suspendedForOtherUse;
+
 	KnxDimmerProcessListener(final GroupAddress onOff, final Optional<GroupAddress> onOffOverride, final Optional<GroupAddress> precenseDetectorLock,
 			final Optional<GroupAddress> dim, final Optional<GroupAddress> dimAbsolute, final Optional<GroupAddress> dimAbsoluteOverride,
-			final Optional<Integer> minDimVal, Dimmer dimmer) {
+			final Optional<Integer> minDimVal, final Optional<GroupAddress> deactivateOnOtherUse, Dimmer dimmer) {
 		this.onOff = onOff;
 		this.dim = dim;
 		this.dimAbsolute = dimAbsolute;
 		this.onOffOverride = onOffOverride;
 		this.dimAbsoluteOverride = dimAbsoluteOverride;
 		this.precenseDetectorLock = precenseDetectorLock;
+		this.deactivateOnOtherUse = deactivateOnOtherUse;
 		if (minDimVal.isPresent()) {
 			this.minDimVal = minDimVal.get();
 		}
@@ -68,6 +72,15 @@ public class KnxDimmerProcessListener extends AbstractDimmerProcessListener {
 	@Override
 	public void groupWrite(final ProcessEvent e) {
 		try {
+
+			if (deactivateOnOtherUse.isPresent() && e.getDestination().equals(deactivateOnOtherUse.get())) {
+				this.suspendedForOtherUse = asBool(e);
+			}
+
+			if (suspendedForOtherUse) {
+				dimmer.interrupt();
+				return;
+			}
 
 			if (dim.isPresent() && e.getDestination().equals(dim.get())) {
 				dimmer.interrupt();

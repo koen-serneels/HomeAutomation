@@ -53,6 +53,7 @@ import be.error.rpi.ebus.commands.GetHeatingCircuitHeatingDemandGv;
 import be.error.rpi.ebus.commands.GetOutsideTemperature;
 import be.error.rpi.heating.HeatingController;
 import be.error.rpi.heating.HeatingInfoPollerJobSchedulerFactory;
+import be.error.rpi.sonos.SonosController;
 
 /**
  * @author Koen Serneels
@@ -114,6 +115,8 @@ public class StartRpiGv {
 				logger.error("HEATING CONTROLLER DID NOT START", e);
 			}
 		}).start();
+
+		new SonosController().start();
 
 		logger.debug("Done starting up threads");
 	}

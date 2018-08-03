@@ -46,6 +46,8 @@ public class DimmerEethoek implements DimmerConfig {
 				inputGroupAddressForOnAndOff("5/1/6");
 				inputGroupAddressForDimStartAndStop("5/1/5");
 				inputGroupAddressForAbsoluteDimValue("14/0/6");
+
+				inputGroupAddressForDeactiveOnOtherUse("15/1/0");
 			}
 		}.build();
 	}

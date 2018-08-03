@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -63,6 +63,7 @@ public class DimmerBuilder {
 	private Optional<GroupAddress> dim = empty();
 	private Optional<GroupAddress> dimAbsolute = empty();
 	private Optional<GroupAddress> dimAbsoluteOverride = empty();
+	private Optional<GroupAddress> deactivateOnOtherUse = empty();
 
 	//GA's that are written to (~output)
 	private List<GroupAddress> switchGroupAddresses = new ArrayList();
@@ -186,6 +187,15 @@ public class DimmerBuilder {
 	}
 
 	/**
+	 * When an "on" is sent on this GA, the current dimmer will be suspended to allow to re-use the same button to do other things as long as the other use is enabled.
+	 * From the moment an "off" is received, the dimmer continues normal operation
+	 */
+	public DimmerBuilder inputGroupAddressForDeactiveOnOtherUse(String dim) {
+		this.deactivateOnOtherUse = of(createGroupAddress(dim));
+		return this;
+	}
+
+	/**
 	 * The dimming will not go below this value. This is important as certain LED drivers turn themselves off if the analog 0-10v input goes lower than a specific
 	 * voltage. By setting the min dim value the LED cannot be 'dimmed to off'. This increases user experience as the LED can now not be accidentally turned off when
 	 * the user wants to dim to minimum. In other words, if dimming stops, the user knows the LED is at it's minimum.
@@ -227,7 +237,7 @@ public class DimmerBuilder {
 			dimmer.start();
 
 			KnxDimmerProcessListener knxDimmerProcessListener = new KnxDimmerProcessListener(onOff, onOffOverride, precenseDetectorLock, dim, dimAbsolute,
-					dimAbsoluteOverride, minDimVal, dimmer);
+					dimAbsoluteOverride, minDimVal, deactivateOnOtherUse, dimmer);
 			getInstance().getKnxConnectionFactory().addProcessListener(knxDimmerProcessListener);
 			dimmer.setKnxDimmerProcessListener(knxDimmerProcessListener);
 			return dimmer;

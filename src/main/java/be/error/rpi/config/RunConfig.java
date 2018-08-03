@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -23,7 +23,6 @@ import static com.pi4j.io.i2c.I2CBus.BUS_1;
 import static java.lang.System.setProperty;
 
 import java.io.IOException;
-import java.io.UncheckedIOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -62,12 +61,16 @@ public class RunConfig {
 	private final String LOXONE_IP = "192.168.0.5";
 	private final IndividualAddress LOXONE_IA;
 	private final int LOXONE_PORT = 6000;
+	private final int LOXONE_SONOS_PORT = 6001;
 
 	private final String KNX_IP = "192.168.0.6";
 	private final int KNX_PORT = 3671;
 
 	private final String EBUSD_IP = "192.168.0.10";
 	private final int EBUSD_PORT = 8888;
+
+	private final String SONOS_CONTROLLER_HOST = "192.168.0.10";
+	private final int SONOS_CONTROLLER_PORT = 5005;
 
 	private final int UDP_CHAN_PORT = 8010;
 
@@ -145,7 +148,7 @@ public class RunConfig {
 
 	public synchronized void registerLucidControlAO4(int portId, String portName) throws IOException {
 		LucidControlAO4 lucidControlAO4 = new LucidControlAO4(portName);
-			lucidControlAO4.open();
+		lucidControlAO4.open();
 		lucidControlMap.put(portId, lucidControlAO4);
 	}
 
@@ -168,7 +171,7 @@ public class RunConfig {
 			reInitLucidControl(lucidControlAO4);
 		}
 	}
-	
+
 	public String getLocalIp() {
 		return LOCAL_IP;
 	}
@@ -227,5 +230,17 @@ public class RunConfig {
 
 	public Scheduler getScheduler() {
 		return scheduler;
+	}
+
+	public int getLoxoneSonosPort() {
+		return LOXONE_SONOS_PORT;
+	}
+
+	public String getSonosControllerHost() {
+		return SONOS_CONTROLLER_HOST;
+	}
+
+	public int getSonosControllerPort() {
+		return SONOS_CONTROLLER_PORT;
 	}
 }

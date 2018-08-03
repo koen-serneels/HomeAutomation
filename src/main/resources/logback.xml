@@ -4,7 +4,7 @@
 		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
 			<fileNamePattern>application.%d{yyyy-MM-dd}.log</fileNamePattern>
 			<maxHistory>7</maxHistory>
-			<totalSizeCap>1GB</totalSizeCap>
+			<totalSizeCap>1MB</totalSizeCap>
 		</rollingPolicy>
 		<encoder>
 			<pattern>%d{"yyyy-MM-dd'T'HH:mm:ss,SSS"} %d [%thread] %-5level %logger{35} - %msg%n</pattern>
@@ -16,7 +16,7 @@
 		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
 			<fileNamePattern>gang.%d{yyyy-MM-dd}.log</fileNamePattern>
 			<maxHistory>7</maxHistory>
-			<totalSizeCap>1GB</totalSizeCap>
+			<totalSizeCap>1MB</totalSizeCap>
 		</rollingPolicy>
 		<encoder>
 			<pattern>%d{"yyyy-MM-dd'T'HH:mm:ss,SSS"} 	%d [%thread] %-5level %logger{35} - %msg%n</pattern>
@@ -28,7 +28,7 @@
 		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
 			<fileNamePattern>vent.%d{yyyy-MM-dd}.log</fileNamePattern>
 			<maxHistory>7</maxHistory>
-			<totalSizeCap>1GB</totalSizeCap>
+			<totalSizeCap>1MB</totalSizeCap>
 		</rollingPolicy>
 		<encoder>
 			<pattern>%d{"yyyy-MM-dd'T'HH:mm:ss,SSS"} %d [%thread] %-5level %logger{35} - %msg%n</pattern>
@@ -40,7 +40,7 @@
 		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
 			<fileNamePattern>ebusd.%d{yyyy-MM-dd}.log</fileNamePattern>
 			<maxHistory>7</maxHistory>
-			<totalSizeCap>1GB</totalSizeCap>
+			<totalSizeCap>1MB</totalSizeCap>
 		</rollingPolicy>
 		<encoder>
 			<pattern>%d{"yyyy-MM-dd'T'HH:mm:ss,SSS"} %d [%thread] %-5level %logger{35} - %msg%n</pattern>
@@ -52,7 +52,7 @@
 		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
 			<fileNamePattern>heating.%d{yyyy-MM-dd}.log</fileNamePattern>
 			<maxHistory>7</maxHistory>
-			<totalSizeCap>1GB</totalSizeCap>
+			<totalSizeCap>1MB</totalSizeCap>
 		</rollingPolicy>
 		<encoder>
 			<pattern>%d{"yyyy-MM-dd'T'HH:mm:ss,SSS"} %d [%thread] %-5level %logger{35} - %msg%n</pattern>
@@ -65,7 +65,7 @@
 		</encoder>
 	</appender>
 
-	<root level="debug">
+	<root level="error">
 		<appender-ref ref="FILE"/>
 	</root>
 
