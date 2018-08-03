@@ -23,7 +23,7 @@ import java.math.BigDecimal;
 
 public class ControlValueCalculator {
 
-	private BigDecimal delta_low = new BigDecimal("0.20");
+	private BigDecimal delta_low = new BigDecimal("0.10");
 	private BigDecimal delta_high = new BigDecimal("0.10");
 
 	private BigDecimal delta_trigger = new BigDecimal("0.50");

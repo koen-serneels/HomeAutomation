@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -39,7 +39,7 @@ public class ControlValueCalculatorTest {
 		assertEquals(controlValueCalculator.getControlValue(new BigDecimal("22.50"), new BigDecimal("23.00")), new BigDecimal("22.50"));
 		assertEquals(controlValueCalculator.getControlValue(new BigDecimal("22.60"), new BigDecimal("23.00")), new BigDecimal("22.50"));
 		assertEquals(controlValueCalculator.getControlValue(new BigDecimal("22.70"), new BigDecimal("23.00")), new BigDecimal("22.50"));
-		assertEquals(controlValueCalculator.getControlValue(new BigDecimal("22.80"), new BigDecimal("23.00")), new BigDecimal("22.80"));
+		assertEquals(controlValueCalculator.getControlValue(new BigDecimal("22.80"), new BigDecimal("23.00")), new BigDecimal("22.50"));
 		assertEquals(controlValueCalculator.getControlValue(new BigDecimal("22.90"), new BigDecimal("23.00")), new BigDecimal("22.90"));
 		assertEquals(controlValueCalculator.getControlValue(new BigDecimal("22.95"), new BigDecimal("23.00")), new BigDecimal("22.90"));
 		assertEquals(controlValueCalculator.getControlValue(new BigDecimal("23.00"), new BigDecimal("23.00")), new BigDecimal("22.90"));
@@ -58,8 +58,8 @@ public class ControlValueCalculatorTest {
 		assertEquals(controlValueCalculator.getControlValue(new BigDecimal("23.05"), new BigDecimal("23.40")), new BigDecimal("22.90"));
 		assertEquals(controlValueCalculator.getControlValue(new BigDecimal("23.10"), new BigDecimal("23.40")), new BigDecimal("22.90"));
 		assertEquals(controlValueCalculator.getControlValue(new BigDecimal("23.16"), new BigDecimal("23.40")), new BigDecimal("22.90"));
-		assertEquals(controlValueCalculator.getControlValue(new BigDecimal("23.20"), new BigDecimal("23.40")), new BigDecimal("23.20"));
-		assertEquals(controlValueCalculator.getControlValue(new BigDecimal("23.29"), new BigDecimal("23.40")), new BigDecimal("23.29"));
+		assertEquals(controlValueCalculator.getControlValue(new BigDecimal("23.20"), new BigDecimal("23.40")), new BigDecimal("22.90"));
+		assertEquals(controlValueCalculator.getControlValue(new BigDecimal("23.29"), new BigDecimal("23.40")), new BigDecimal("22.90"));
 		assertEquals(controlValueCalculator.getControlValue(new BigDecimal("23.35"), new BigDecimal("23.40")), new BigDecimal("23.30"));
 		assertEquals(controlValueCalculator.getControlValue(new BigDecimal("23.45"), new BigDecimal("23.40")), new BigDecimal("23.30"));
 		assertEquals(controlValueCalculator.getControlValue(new BigDecimal("23.50"), new BigDecimal("23.40")), new BigDecimal("23.30"));
@@ -78,13 +78,13 @@ public class ControlValueCalculatorTest {
 
 		RoomTemperature roomTemperature = controlValueCalculator.updateHeatingDemand(create("22.80", "23.00"));
 		roomTemperature.updateHeatingDemand(false);
-		assertFalse(controlValueCalculator.updateHeatingDemand(roomTemperature).getHeatingDemand());
+		assertTrue(controlValueCalculator.updateHeatingDemand(roomTemperature).getHeatingDemand());
 		roomTemperature.updateHeatingDemand(true);
 		assertTrue(controlValueCalculator.updateHeatingDemand(roomTemperature).getHeatingDemand());
 
 		roomTemperature = controlValueCalculator.updateHeatingDemand(create("22.80", "23.00"));
 		roomTemperature.updateHeatingDemand(false);
-		assertFalse(controlValueCalculator.updateHeatingDemand(roomTemperature).getHeatingDemand());
+		assertTrue(controlValueCalculator.updateHeatingDemand(roomTemperature).getHeatingDemand());
 		roomTemperature.updateCurrentTemp(22.50);
 		assertTrue(controlValueCalculator.updateHeatingDemand(roomTemperature).getHeatingDemand());
 
