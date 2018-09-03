@@ -43,6 +43,7 @@ public class DimmerEethoek implements DimmerConfig {
 				outputGroupAddressesForVisualisationStatusFeedback("15/0/6");
 				outputGroupAddressesForSwitchLedControl("5/1/4");
 				outputGroupAddressesSwitchUpdate("5/1/6");
+
 				inputGroupAddressForOnAndOff("5/1/6");
 				inputGroupAddressForDimStartAndStop("5/1/5");
 				inputGroupAddressForAbsoluteDimValue("14/0/6");

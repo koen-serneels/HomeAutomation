@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -34,6 +34,7 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.BlockingQueue;
@@ -99,6 +100,7 @@ public class Dimmer extends Thread {
 		this.switchGroupAddresses = switchGroupAddresses;
 		this.feedbackGroupAddresses = feedbackGroupAddresses;
 		this.switchLedControlGroupAddresses = switchLedControlGroupAddresses;
+		this.outputSwitchUpdateGroupAddresses = outputSwitchUpdateGroupAddresses;
 	}
 
 	public void run() {
@@ -126,11 +128,11 @@ public class Dimmer extends Thread {
 							if ((activeScene.isPresent())) {
 								activateSceneLeds(pc);
 								dimmerCommand = activeScene.get();
-								sendFeedback(pc, dimmerCommand.getTargetVal().intValue(), true);
+								sendDimmerFeedback(pc, dimmerCommand.getTargetVal().intValue(), true);
 								feedbackSend = true;
 							}
 						} else {
-							activateAllLedsAndFeedback(pc);
+							sendStatusFeedback(true, !command.isActicatedByPrecense(), pc);
 							sleep(delayBeforeIncreasingDimValue);
 						}
 					}
@@ -158,7 +160,7 @@ public class Dimmer extends Thread {
 					}
 
 					if (!feedbackSend && !getInstance().getLoxoneIa().equals(dimmerCommand.getOrigin())) {
-						sendFeedback(pc, getCurVal().intValue(), false);
+						sendDimmerFeedback(pc, getCurVal().intValue(), false);
 					}
 
 					if (curVal.compareTo(ZERO) == 0) {
@@ -170,13 +172,7 @@ public class Dimmer extends Thread {
 						}
 
 						if (!interupt.get()) {
-							for (GroupAddress groupAddress : union(union(switchGroupAddresses, switchLedControlGroupAddresses), outputSwitchUpdateGroupAddresses)) {
-								try {
-									pc.write(groupAddress, false);
-								} catch (Exception e) {
-									logger.error("Dimmer " + dimmerName + " turnoff delay threed got exception while sending to " + groupAddress.toString(), e);
-								}
-							}
+							sendStatusFeedback(false, !dimmerCommand.isActicatedByPrecense(), pc);
 						}
 					}
 				});
@@ -200,22 +196,27 @@ public class Dimmer extends Thread {
 		interupt.set(true);
 	}
 
-	private void activateAllLedsAndFeedback(ProcessCommunicator pc) throws Exception {
-		for (GroupAddress groupAddress : union(union(switchGroupAddresses, switchLedControlGroupAddresses), outputSwitchUpdateGroupAddresses)) {
-			pc.write(groupAddress, true);
+	private void sendStatusFeedback(boolean status, boolean sendLedFeedback, ProcessCommunicator pc) throws Exception {
+		Collection<GroupAddress> collection = union(switchGroupAddresses, outputSwitchUpdateGroupAddresses);
+
+		if (sendLedFeedback) {
+			collection = union(collection, switchLedControlGroupAddresses);
+		}
+
+		for (GroupAddress groupAddress : collection) {
+			pc.write(groupAddress, status);
 		}
 	}
 
 	private void activateSceneLeds(ProcessCommunicator pc) throws Exception {
-		for (GroupAddress groupAddress : union(union(switchGroupAddresses, switchLedControlGroupAddresses), outputSwitchUpdateGroupAddresses)) {
-			pc.write(groupAddress, false);
-		}
+		sendStatusFeedback(false, true, pc);
+
 		for (GroupAddress groupAddress : activeScene.get().getSceneContext().get().getSceneParticipants()) {
 			pc.write(groupAddress, true);
 		}
 	}
 
-	private void sendFeedback(ProcessCommunicator pc, int val, boolean refresh) throws Exception {
+	private void sendDimmerFeedback(ProcessCommunicator pc, int val, boolean refresh) throws Exception {
 		for (GroupAddress groupAddress : feedbackGroupAddresses) {
 
 			DPTXlator8BitUnsigned dDPTXlator8BitUnsigned = new DPTXlator8BitUnsigned(DPT_PERCENT_U8);

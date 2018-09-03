@@ -43,8 +43,9 @@ public class DimmerBadkamer implements DimmerConfig {
 				outputGroupAddressesForActorSwitchingOnAndOff("4/4/1");
 				outputGroupAddressesSwitchUpdate("4/4/10");
 
-				//inputGroupAddressForOnAndOff("4/4/8");
-				inputGroupAddressForOnOffOverride("4/4/8", "4/4/11");
+				precenseOperated("4/4/11");
+
+				inputGroupAddressForOnOffOverride("4/4/8");
 				inputGroupAddressForDimStartAndStop("4/4/9");
 				inputGroupAddressForAbsoluteDimValue("14/0/2");
 				inputGroupAddressForAbsoluteDimValueOverride("14/0/16");

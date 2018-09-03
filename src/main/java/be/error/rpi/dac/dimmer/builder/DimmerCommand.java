@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -39,6 +39,7 @@ public class DimmerCommand {
 	private Optional<SceneContext> sceneContext = empty();
 
 	private boolean override;
+	private boolean acticatedByPrecense;
 
 	public DimmerCommand(final BigDecimal targetVal, final IndividualAddress origin, SceneContext sceneContext, boolean useThisDimCommandOnSceneDeativate) {
 		this(targetVal, origin, sceneContext);
@@ -77,6 +78,14 @@ public class DimmerCommand {
 
 	public boolean isUseThisDimCommandOnSceneDeativate() {
 		return useThisDimCommandOnSceneDeativate;
+	}
+
+	public boolean isActicatedByPrecense() {
+		return acticatedByPrecense;
+	}
+
+	public void setActicatedByPrecense(final boolean acticatedByPrecense) {
+		this.acticatedByPrecense = acticatedByPrecense;
 	}
 
 	@Override

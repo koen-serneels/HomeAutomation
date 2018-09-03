@@ -44,8 +44,10 @@ public class DimmerBerging implements DimmerConfig {
 				outputGroupAddressesForActorSwitchingOnAndOff("5/6/1");
 				outputGroupAddressesSwitchUpdate("5/6/5");
 
+				precenseOperated("5/6/6");
+
 				inputGroupAddressForOnAndOff("5/6/0");
-				inputGroupAddressForOnOffOverride("5/6/4", "5/6/6");
+				inputGroupAddressForOnOffOverride("5/6/4");
 				inputGroupAddressForAbsoluteDimValue("14/0/11");
 				inputGroupAddressForDimStartAndStop("5/6/3");
 			}

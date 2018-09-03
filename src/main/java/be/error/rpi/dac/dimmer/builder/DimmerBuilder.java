@@ -27,6 +27,7 @@ import static java.util.Arrays.asList;
 import static java.util.Optional.empty;
 import static java.util.Optional.of;
 import static java.util.stream.Collectors.toList;
+import static org.apache.commons.lang3.StringUtils.isEmpty;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -57,7 +58,7 @@ public class DimmerBuilder {
 	private Optional<Integer> stepDelay = empty();
 
 	//GA's that are read from the bus (~input)
-	private GroupAddress onOff;
+	private Optional<GroupAddress> onOff = empty();
 	private Optional<GroupAddress> precenseDetectorLock = empty();
 	private Optional<GroupAddress> onOffOverride = empty();
 	private Optional<GroupAddress> dim = empty();
@@ -141,11 +142,15 @@ public class DimmerBuilder {
 		return this;
 	}
 
+	public DimmerBuilder precenseOperated(String precenseDetectorLock) {
+		this.precenseDetectorLock = of(createGroupAddress(precenseDetectorLock));
+		return this;
+	}
+
 	/**
 	 */
-	public DimmerBuilder inputGroupAddressForOnOffOverride(String onOffOverride, String precenseDetectorLock) {
-		this.onOffOverride = of(createGroupAddress(onOffOverride));
-		this.precenseDetectorLock = of(createGroupAddress(precenseDetectorLock));
+	public DimmerBuilder inputGroupAddressForOnOffOverride(String onOffOverride) {
+		this.onOffOverride = isEmpty(onOffOverride) ? empty() : of(createGroupAddress(onOffOverride));
 		return this;
 	}
 
@@ -154,7 +159,7 @@ public class DimmerBuilder {
 	 * Mostly this will be the switch FO of a KNX taster that will be bound to this GA.
 	 */
 	public DimmerBuilder inputGroupAddressForOnAndOff(String onOff) {
-		this.onOff = createGroupAddress(onOff);
+		this.onOff = of(createGroupAddress(onOff));
 		return this;
 	}
 
