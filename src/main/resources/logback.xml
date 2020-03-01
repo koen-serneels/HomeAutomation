@@ -69,19 +69,19 @@
 		<appender-ref ref="FILE"/>
 	</root>
 
-	<logger name="gang" level="debug" additivity="false">
-		<appender-ref ref="FILE_GANG" />
+	<logger name="gang" level="error" additivity="false">
+		<appender-ref ref="FILE_GANG"/>
 	</logger>
 
-	<logger name="vent" level="debug" additivity="false">
+	<logger name="vent" level="error" additivity="false">
 		<appender-ref ref="FILE_VENT"/>
 	</logger>
 
-	<logger name="ebusd" level="debug" additivity="false">
+	<logger name="ebusd" level="error" additivity="false">
 		<appender-ref ref="FILE_EBUSD"/>
 	</logger>
 
-	<logger name="heating" level="debug" additivity="false">
+	<logger name="heating" level="error" additivity="false">
 		<appender-ref ref="FILE_HEATING"/>
 	</logger>
 
