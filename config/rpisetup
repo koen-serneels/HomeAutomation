@@ -32,15 +32,25 @@ wpa-psk <REMOVEDREMOVEDREMOVED>
 allow-hotplug wlan1
 iface wlan1 inet manual
     wpa-conf /etc/wpa_supplicant/wpa_supplicant.conf
+-------------------------------------------
+
+----------/etc/dhcpcd.conf----------
+interface eth0
+static ip_address=192.168.0.11
+static subnet-mask=255.255.255.0
+static routers=192.168.0.1
+static domain_name_servers=195.130.131.131, 195.130.130.3
+------------------------------------
 
 =================After image write=================
 
----------------------
-sudo apt-get install oracle-java8-jdk
+----------deps-----------
+sudo apt-get install openjdk-8-jdk
 sudo apt-get install -y python-smbus i2c-tools
 sudo apt-get install screen
 sudo apt-get install dh-autoreconf
 sudo raspi-config
+-------------------------
 
 ----------ebusd----------
 https://github.com/john30/ebusd/
@@ -59,9 +69,11 @@ add "-ev" or "-gv" to user eg. ${debian_chroot:+($debian_chroot)}\[\033[01;32m\]
 ---------------------------
 
 ----------/etc/rc.local----------
-su pi -c '(cd /home/pi/IdeaProjects/HomeAutomation && nohup java -Djava.rmi.server.hostname=192.168.0.10 -Dcom.sun.management.jmxremote=true -Dcom.sun.management.jmxremote.port=9001 -Dcom.sun.management.jmxremote.ssl=false -Dcom.sun.management.jmxremote.authenticate=false -Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=9000 -cp  /home/pi/IdeaProjects/HomeAutomation/classes:/home/pi/IdeaProjects/HomeAutomation/lib/* be.error.rpi.StartRpiGv &)'
-su pi -c "(nohup screen -dmS ebusd bash -c 'ebusd -s -f -a70 --enablehex --scanconfig' &)"
-su pi -c '(cd /home/pi/amazon-echo-ha-bridge && nohup /home/pi/maven-3.5.0/bin/mvn spring-boot:run -Dupnp.config.address=192.168.0.10 -Dserver.port=8080 &)'
+su pi -c "(nohup sleep 20 && screen -dmS sonos bash -c '/usr/local/bin/npm --prefix /home/pi/node-sonos-http-api/ run start' &)"
+#su pi -c "(nohup sleep 30 && screen -dmS echo-bridge -c '/home/pi/maven-3.5.0/bin/mvn -f /home/pi/amazon-echo-ha-bridge/pom.xml spring-boot:run -Dupnp.config.address=192.168.0.10 -Dserver.port=8080' &)"
+su pi -c "(nohup sleep 30 && screen -dmS ha-bridge bash -c 'java -Dserver.port=8080 -jar /home/pi/ha-bridge/target/ha-bridge-5.3.0.jar' &)"
+su pi -c "(nohup sleep 60 && screen -dmS ebusd bash -c 'ebusd -s -f -a70 --enablehex --scanconfig' &)"
+su pi -c '(nohup sleep 100 && cd /home/pi/IdeaProjects/HomeAutomation && nohup java -Djava.rmi.server.hostname=192.168.0.10 -Dcom.sun.management.jmxremote=true -Dcom.sun.management.jmxremote.port=9001 -Dcom.sun.management.jmxremote.ssl=false -Dcom.sun.management.jmxremote.authenticate=false -Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=9000 -cp  /home/pi/IdeaProjects/HomeAutomation/classes:/home/pi/IdeaProjects/HomeAutomation/lib/* be.error.rpi.StartRpiGv &)'
 ----------------------------------
 
 ----------/etc/udev/rules.d/lucid-control.rules----------
@@ -69,40 +81,7 @@ KERNEL=="ttyACM[0-9]*", SUBSYSTEM=="tty", ATTRS{idVendor}=="16d0", ATTRS{idProdu
 Test with:sudo udevadm control --reload-rules
 ---------------------------------------------------------
 
-----------/etc/dhcpcd.conf----------
-interface eth0
-static ip_address=192.168.0.11
-static subnet-mask=255.255.255.0
-static routers=192.168.0.1
-static domain_name_servers=195.130.131.131, 195.130.130.3
-------------------------------------
-
-----------/etc/network/interfaces----------
-auto lo
-iface lo inet loopback
-iface eth0 inet manual
-
-allow-hotplug wlan0
-iface wlan0 inet manual
-#    wpa-conf /etc/wpa_supplicant/wpa_supplicant.conf
-#iface wlan0 inet static
-#address 192.168.0.50
-#gateway 192.168.0.1
-#dns-nameservers 195.130.131.131, 195.130.130.3
-#netmask 255.255.255.0
-#wpa-driver wext
-#wpa-conf managed
-#wpa-ssid <REMOVEDREMOVEDREMOVED>
-#wpa-ap-scan 1
-#wpa-proto RSN
-#wpa-pairwise CCMP
-#wpa-group CCMP
-#wpa-key-mgmt WPA-PSK
-#wpa-psk <REMOVEDREMOVEDREMOVED>
-
-allow-hotplug wlan1
-iface wlan1 inet manual
-    wpa-conf /etc/wpa_supplicant/wpa_supplicant.conf
-
--------------------------------------------
-
+-----------keys-----------
+ssh-keygen -t rsa
+echo "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDebj5jiT715vLEld4Wfdww8qS0CBNRN8jzImAqw7XIra0SAu79pt3bUdJiO35Y8XPW0gkMBaM96mcvlcospcWSMavi11iw4gHFUPppONTY3dvu1WX+KpUIGWy/ddIjynDzhGO2ZiYo+uByZ+JQYr901rKJNOwSl4x0J52ZEv/S8MtvInZ2N+PQxZPko1bd9MMcjQVlyVofeStCYPgVTUbNrxR7S81oGaNKythZroJK1kqoofZYQjOX8izKg/WBXtnGSQLwf4WvI7eY5fb7Dg0iz30RWVQ3wtJbE3+7q1O5FC/stfEPjFMX8aSVx3OKizijalfjRVK6YBbPR90+Ytk7 koen@koen-HP-EliteBook-8570w" > /home/pi/.ssh/authorized_keys 
+-----------keys-----------
