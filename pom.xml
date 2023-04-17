@@ -11,7 +11,7 @@
 	<properties>
 		<sourceJavaVersion>1.8</sourceJavaVersion>
 		<targetJavaVersion>1.8</targetJavaVersion>
-		<spring.version>5.2.4.RELEASE</spring.version>
+		<spring.version>6.0.0</spring.version>
 	</properties>
 
 	<build>
